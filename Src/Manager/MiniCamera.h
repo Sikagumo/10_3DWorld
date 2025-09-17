@@ -1,6 +1,6 @@
 #pragma once
 #include <DxLib.h>
-#include "../Common/Vector2.h"
+#include "../Utility/Vector2.h"
 class Camera;
 
 class MiniCamera

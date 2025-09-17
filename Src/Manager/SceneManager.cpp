@@ -118,9 +118,6 @@ void SceneManager::Update(void)
 
 void SceneManager::Draw(void)
 {
-	
-	camera_->SetBeforeDraw();
-
 	miniCamera_->DrawScreen();
 
 	// 描画先グラフィック領域の指定
@@ -129,6 +126,8 @@ void SceneManager::Draw(void)
 
 	// 画面を初期化
 	ClearDrawScreen();
+
+	camera_->SetBeforeDraw();
 
 	// 各シーンの描画処理
 	scene_->Draw();
@@ -178,22 +177,6 @@ void SceneManager::ChangeScene(SCENE_ID nextId)
 
 }
 
-SceneManager::SCENE_ID SceneManager::GetSceneID(void)
-{
-	return sceneId_;
-}
-
-float SceneManager::GetDeltaTime(void) const
-{
-	//return 1.0f / 60.0f;
-	return deltaTime_;
-}
-
-Camera* SceneManager::GetCamera(void) const
-{
-	return camera_;
-}
-
 SceneManager::SceneManager(void)
 {
 
@@ -237,6 +220,7 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	case SCENE_ID::TITLE:
 		scene_ = new TitleScene();
 		break;
+
 	case SCENE_ID::GAME:
 		break;
 	}
@@ -265,6 +249,7 @@ void SceneManager::Fade(void)
 			isSceneChanging_ = false;
 		}
 		break;
+
 	case Fader::STATE::FADE_OUT:
 		// 暗転中
 		if (fader_->IsEnd())

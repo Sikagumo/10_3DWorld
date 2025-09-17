@@ -1,6 +1,7 @@
 #pragma once
 #include "SceneBase.h"
 class Grid;
+class Stage;
 
 class TitleScene : public SceneBase
 {
@@ -23,4 +24,5 @@ private:
 	// ƒOƒŠƒbƒhü
 	Grid* grid_;
 
+	Stage* stage_;
 };

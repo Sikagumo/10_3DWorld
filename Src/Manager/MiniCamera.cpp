@@ -1,12 +1,13 @@
-#include "../Application.h"
-#include "Camera.h"
-#include "SceneManager.h"
 #include "MiniCamera.h"
+#include "../Application.h"
+#include "../Utility/Vector2.h"
+#include "./Camera.h"
+#include "./SceneManager.h"
 
 MiniCamera::MiniCamera(Camera* camera)
 {
 	camera_ = camera;
-	size_ = Vector2(SIZE_X, SIZE_Y);
+	size_ = {SIZE_X, SIZE_Y};
 	miniScreen_ = MakeScreen(size_.x, size_.y);
 	modelId_ = -1;
 	pos_ = { 0.0f, 0.0f, 0.0f };

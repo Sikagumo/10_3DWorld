@@ -47,17 +47,19 @@ public:
 	// リソースの破棄
 	void Destroy(void);
 
+
 	// 状態遷移
 	void ChangeScene(SCENE_ID nextId);
 
 	// シーンIDの取得
-	SCENE_ID GetSceneID(void);
+	SCENE_ID GetSceneID(void) { return sceneId_; };
 
 	// デルタタイムの取得
-	float GetDeltaTime(void) const;
+	float GetDeltaTime(void) const { return deltaTime_; };
 
 	// カメラの取得
-	Camera* GetCamera(void) const;
+	Camera& GetCamera(void) const { return *camera_; };
+
 
 private:
 
@@ -85,6 +87,7 @@ private:
 	// デルタタイム
 	std::chrono::system_clock::time_point preTime_;
 	float deltaTime_;
+
 	
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする

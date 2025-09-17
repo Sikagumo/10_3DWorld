@@ -39,6 +39,11 @@ public:
 
 	// 描画前のカメラ設定
 	void SetBeforeDraw(void);
+	void SetBeforeDrawFixedPoint(void);
+	void SetBeforeDrawFree(void);
+
+	// カメラモードの変更
+	void ChangeMode(MODE mode);
 
 	// デバッグ用描画
 	void DrawDebug(void);
@@ -48,19 +53,12 @@ public:
 
 
 	// 座標の取得
-	const VECTOR& GetPos(void) const;
+	const VECTOR& GetPos(void) const { return pos_; };
 
 	// 角度の取得
-	const VECTOR& GetAngles(void) const;
-
-	// 描画前のカメラ設定
-	void SetBeforeDraw(void);
-	void SetBeforeDrawFixedPoint(void);
-	void SetBeforeDrawFree(void);
-
-	// カメラモードの変更
-	void ChangeMode(MODE mode);
-
+	const VECTOR& GetAngles(void) const { return angles_; };
+	
+	
 
 private:
 
@@ -72,5 +70,6 @@ private:
 
 	// カメラの角度
 	VECTOR angles_;
-
+	
+	void MoveXYZDirection(void);
 };

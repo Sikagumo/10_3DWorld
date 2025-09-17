@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <DxLib.h>
-#include "../Common/Vector2.h"
+#include "../Utility/Vector2.h"
 #include "../Common/Quaternion.h"
 class AsoUtility
 {

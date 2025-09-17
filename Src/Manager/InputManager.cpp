@@ -49,9 +49,8 @@ void InputManager::SetInputKey(void)
 	AddKey(KEY_INPUT_A);
 	AddKey(KEY_INPUT_S);
 	AddKey(KEY_INPUT_D);
-	AddKey(KEY_INPUT_C);
-	AddKey(KEY_INPUT_V);
-	AddKey(KEY_INPUT_Z);
+	AddKey(KEY_INPUT_Q);
+	AddKey(KEY_INPUT_E);
 
 	AddKey(KEY_INPUT_UP);
 	AddKey(KEY_INPUT_DOWN);
