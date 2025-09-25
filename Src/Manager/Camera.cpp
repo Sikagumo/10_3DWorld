@@ -88,23 +88,34 @@ void Camera::SetBeforeDrawFree(void)
 void Camera::MoveXYZDirection(void)
 {
 	auto& input = InputManager::GetInstance();
-
+	
 	// 矢印キーでカメラの角度を変える
 	float rotPow = 1.0f * DX_PI_F / 180.0f;
+	VECTOR dir = {};
 
-	if (input.KeyIsNew(KEY_INPUT_DOWN)) { angles_.x += rotPow; }
-	if (input.KeyIsNew(KEY_INPUT_UP)) { angles_.x -= rotPow; }
-	if (input.KeyIsNew(KEY_INPUT_RIGHT)) { angles_.y += rotPow; }
-	if (input.KeyIsNew(KEY_INPUT_LEFT)) { angles_.y -= rotPow; }
+	if (GetJoypadNum() == 0)
+	{
+		if (input.KeyIsNew(KEY_INPUT_DOWN)) { angles_.x += rotPow; }
+		if (input.KeyIsNew(KEY_INPUT_UP)) { angles_.x -= rotPow; }
+		if (input.KeyIsNew(KEY_INPUT_RIGHT)) { angles_.y += rotPow; }
+		if (input.KeyIsNew(KEY_INPUT_LEFT)) { angles_.y -= rotPow; }
+	}
+	else
+	{
+		dir = input.GetAlgKeyDirXZ(0, InputManager::JOYPAD_ALGKEY::RIGHT);
+	}
 
+	
 	// WASDでカメラを移動させる
 	const float movePow = 3.0f;
-	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	if (input.KeyIsNew(KEY_INPUT_W)) { dir = { 0.0f, 0.0f, 1.0f }; }
-	if (input.KeyIsNew(KEY_INPUT_A)) { dir = { -1.0f, 0.0f, 0.0f }; }
-	if (input.KeyIsNew(KEY_INPUT_S)) { dir = { 0.0f, 0.0f, -1.0f }; }
-	if (input.KeyIsNew(KEY_INPUT_D)) { dir = { 1.0f, 0.0f, 0.0f }; }
+	if (GetJoypadNum() == 0)
+	{
+		//if (input.KeyIsNew(KEY_INPUT_W)) { dir = { 0.0f, 0.0f, 1.0f }; }
+		//if (input.KeyIsNew(KEY_INPUT_A)) { dir = { -1.0f, 0.0f, 0.0f }; }
+		//if (input.KeyIsNew(KEY_INPUT_S)) { dir = { 0.0f, 0.0f, -1.0f }; }
+		//if (input.KeyIsNew(KEY_INPUT_D)) { dir = { 1.0f, 0.0f, 0.0f }; }
+	}
 
 	if (!AsoUtility::EqualsVZero(dir))
 	{

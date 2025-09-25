@@ -51,21 +51,22 @@ void ResourceManager::SetResources(void)
 {
 	/*　リソースを取得する処理　*/
 
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_PLAYER, PATH_MODEL + "Player/Player.mv1");
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_IDLE, PATH_MODEL + "Player/Idle.mv1");
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_THROW, PATH_MODEL + "Player/Throw.mv1");
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_WALK, PATH_MODEL + "Player/Walk.mv1");
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_PLAYER, (PATH_MODEL + "Player/Player.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_IDLE, (PATH_MODEL + "Player/Idle.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_THROW, (PATH_MODEL + "Player/Throw.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_WALK, (PATH_MODEL + "Player/Walk.mv1").c_str());
 
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_SHOT, PATH_MODEL + "Shot/Bomb.mv1");
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_SHOT, (PATH_MODEL + "Shot/Bomb.mv1").c_str());
 
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_DICE, PATH_MODEL + "Dice.mv1");
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_CAMERA, PATH_MODEL + "MiniCamera.mv1");
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_STAGE, PATH_MODEL + "Stage.mv1");
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_DICE, (PATH_MODEL + "Dice.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_CAMERA, (PATH_MODEL + "MiniCamera.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_STAGE, (PATH_MODEL + "Stage.mv1").c_str());
 }
 void ResourceManager::SetResource(Resource::LOAD_TYPE type, SRC src, const std::string& path)
 {
 	/*　リソースを登録する処理　*/
-	Resource res(type, path);
+	Resource res;
+	res = Resource(type, path);
 	resourcesMap_.emplace(src, res);
 }
 

@@ -3,6 +3,7 @@
 #include "../Utility/Vector2.h"
 #include "./Camera.h"
 #include "./SceneManager.h"
+#include "../Manager/ResourceManager.h"
 
 MiniCamera::MiniCamera(Camera* camera)
 {
@@ -21,7 +22,7 @@ void MiniCamera::Init(void)
 {
 
 	// ミニカメラモデルの読み込み
-	modelId_ = MV1LoadModel((Application::PATH_MODEL + "MiniCamera.mv1").c_str());
+	modelId_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_CAMERA);
 
 	// ミニカメラモデルの大きさを設定
 	MV1SetScale(modelId_, { SCALE, SCALE, SCALE });
@@ -120,7 +121,6 @@ void MiniCamera::Draw(void)
 
 void MiniCamera::Release(void)
 {
-	MV1DeleteModel(modelId_);
 	DeleteGraph(miniScreen_);
 }
 

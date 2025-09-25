@@ -29,11 +29,14 @@
     <ClCompile Include="Src\Manager\Resource.cpp" />
     <ClCompile Include="Src\Manager\ResourceManager.cpp" />
     <ClCompile Include="Src\Manager\SceneManager.cpp" />
+    <ClCompile Include="Src\Object\AnimationController.cpp" />
     <ClCompile Include="Src\Object\Grid.cpp" />
+    <ClCompile Include="Src\Object\Player.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Scene\TitleScene.cpp" />
     <ClCompile Include="Src\Utility\AsoUtility.cpp" />
+    <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
     <ClCompile Include="Src\Utility\Vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -47,11 +50,14 @@
     <ClInclude Include="Src\Manager\Resource.h" />
     <ClInclude Include="Src\Manager\ResourceManager.h" />
     <ClInclude Include="Src\Manager\SceneManager.h" />
+    <ClInclude Include="Src\Object\AnimationController.h" />
     <ClInclude Include="Src\Object\Grid.h" />
+    <ClInclude Include="Src\Object\Player.h" />
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Scene\TitleScene.h" />
     <ClInclude Include="Src\Utility\AsoUtility.h" />
+    <ClInclude Include="Src\Utility\MatrixUtility.h" />
     <ClInclude Include="Src\Utility\Vector2.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

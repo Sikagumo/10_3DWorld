@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include <string>
+#include <cassert>
 
 Resource::Resource(void)
 {
@@ -15,7 +16,7 @@ Resource::Resource(void)
 	handleIds_ = nullptr; // 読み込み複数画像ハンドルID
 
 #ifdef _DEBUG
-	OutputDebugString("\nリソースの引数が未割当です\n");
+	assert("\nリソースの引数が未割当です\n");
 #endif
 }
 

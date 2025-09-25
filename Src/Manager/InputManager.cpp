@@ -144,15 +144,47 @@ void InputManager::AddKey(unsigned int type)
 
 bool InputManager::KeyIsNewAll(void) const
 {
-	// いずれかのキーが入力しているか判定
+	// いずれかの割り当て済みのキーが入力しているか判定
 
 	bool isInput = false;
 
-	char key[256];
-	GetHitKeyStateAll(key);
-	for (int i = 0; i < 256; ++i)
+	for (auto& k : keys_)
 	{
-		if (key[i] == 1)
+		if (KeyIsNew(k.second.keyType))
+		{
+			isInput = true;
+			break;
+		}
+	}
+
+	return isInput;
+}
+bool InputManager::KeyIsTrgDownAll(void) const
+{
+	// いずれかの割り当て済みのキーの入力した瞬間の判定
+
+	bool isInput = false;
+
+	for (auto& k : keys_)
+	{
+		if (KeyIsTrgDown(k.second.keyType))
+		{
+			isInput = true;
+			break;
+		}
+	}
+
+	return isInput;
+}
+bool InputManager::KeyIsTrgUpAll(void) const
+{
+	// いずれかの割り当て済みのキーの離した瞬間の判定
+
+	bool isInput = false;
+
+	for (auto& k : keys_)
+	{
+		if (KeyIsTrgUp(k.second.keyType))
 		{
 			isInput = true;
 			break;
@@ -573,6 +605,38 @@ int InputManager::PadAlgKeyY(int padNum, int algKey)const
 	if (GetJoypadNum() < padNum) return false;
 
 	return padInfos_[padNum].AlgKeyY[algKey];
+}
+
+const VECTOR& InputManager::GetAlgKeyDirXZ(int padNum, JOYPAD_ALGKEY algKey) const
+{
+	VECTOR ret = {};
+	
+	int algType = static_cast<int>(algKey);
+
+	// スティックの個々の入力値は、
+	// -1000.0f ～ 1000.0f の範囲で返ってくるが、
+	// X:1000.0f、Y:1000.0fになることは無い(1000と500くらいが最大)
+	// スティックの入力値を -1.0 ～ 1.0 に正規化
+	float dirX = (static_cast<float>(padInfos_[padNum].AlgKeyX[algType]) / ALGKEY_VAL_MAX);
+	float dirZ = (static_cast<float>(padInfos_[padNum].AlgKeyY[algType]) / ALGKEY_VAL_MAX);
+
+	// 平方根により、おおよその最大値が1.0となる
+	float len = sqrtf((dirX * dirX) + (dirZ * dirZ));
+	if (len < ALGKEY_THRESHOLD)
+	{
+		// 0でベクトルを返す
+		return ret;
+	}
+
+	// デッドゾーン境界から再スケーリング(可変デッドゾーン)
+	float scale = (len - ALGKEY_THRESHOLD) / (1.0f - ALGKEY_THRESHOLD);
+	dirX = (dirX / len) * scale;
+	dirZ = (dirZ / len) * scale;
+
+	// Zは前方向を正に反転
+	ret = VNorm({ dirX, 0.0f, -dirZ });
+
+	return ret;
 }
 
 #pragma endregion

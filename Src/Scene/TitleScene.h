@@ -2,6 +2,7 @@
 #include "SceneBase.h"
 class Grid;
 class Stage;
+class Player;
 
 class TitleScene : public SceneBase
 {
@@ -25,4 +26,6 @@ private:
 	Grid* grid_;
 
 	Stage* stage_;
+
+	Player* player_;
 };
