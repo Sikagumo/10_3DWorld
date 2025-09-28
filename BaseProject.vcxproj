@@ -29,7 +29,9 @@
     <ClCompile Include="Src\Manager\Resource.cpp" />
     <ClCompile Include="Src\Manager\ResourceManager.cpp" />
     <ClCompile Include="Src\Manager\SceneManager.cpp" />
+    <ClCompile Include="Src\Object\ActorBase.cpp" />
     <ClCompile Include="Src\Object\AnimationController.cpp" />
+    <ClCompile Include="Src\Object\Enemy.cpp" />
     <ClCompile Include="Src\Object\Grid.cpp" />
     <ClCompile Include="Src\Object\Player.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
@@ -50,7 +52,9 @@
     <ClInclude Include="Src\Manager\Resource.h" />
     <ClInclude Include="Src\Manager\ResourceManager.h" />
     <ClInclude Include="Src\Manager\SceneManager.h" />
+    <ClInclude Include="Src\Object\ActorBase.h" />
     <ClInclude Include="Src\Object\AnimationController.h" />
+    <ClInclude Include="Src\Object\Enemy.h" />
     <ClInclude Include="Src\Object\Grid.h" />
     <ClInclude Include="Src\Object\Player.h" />
     <ClInclude Include="Src\Object\Stage.h" />

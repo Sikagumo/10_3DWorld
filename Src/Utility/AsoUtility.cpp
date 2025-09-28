@@ -480,6 +480,29 @@ VECTOR AsoUtility::VNormalize(const VECTOR& v)
     return VNorm(v);
 }
 
+float AsoUtility::NormalizeAngle(float rad)
+{
+    while (rad > DX_PI)
+    {
+        rad -= DX_TWO_PI;
+    }
+    while (rad < -DX_PI)
+    {
+        rad += DX_TWO_PI;
+    }
+    return rad;
+
+}
+
+float AsoUtility::LerpAngle(float from, float to, float t)
+{
+    // Å’ZŒo˜H‚ÌŠp“x·‚ðŒvŽZ
+    float diff = NormalizeAngle(to - from);
+
+    // ·•ª‚¾‚¯•âŠÔ‚µ‚Ä‘«‚·
+    return from + diff * t;
+}
+
 double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
 {
     // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers

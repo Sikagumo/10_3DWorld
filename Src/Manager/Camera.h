@@ -1,5 +1,6 @@
 #pragma once
 #include <DxLib.h>
+class Player;
 
 class Camera
 {
@@ -10,7 +11,16 @@ public:
 	static constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
 
 	// カメラの初期角度
-	static constexpr VECTOR DERFAULT_ANGLES = {(30.0f * (DX_PI_F / 180.0f)), 0.0f, 0.0f};
+	static constexpr VECTOR DERFAULT_ANGLES = { 0.0f, 0.0f, 0.0f };
+
+	// 追従対象からの相対座標
+	static constexpr VECTOR FOLLOW_LOCAL_POS = { 0.0f, 200.0f, -500.0f };
+
+	// 追従対象からカメラへの相対座標
+	static constexpr VECTOR FOLLOW_CAMERA_LOCAL_POS = { 0.0f, 200.0f, -350.0f };
+
+	// 追従対象から注視点への相対座標
+	static constexpr VECTOR FOLLOW_TARGET_LOCAL_POS = { 0.0f, 0.0f, 150.0f };
 
 	// カメラのクリップ範囲
 	static constexpr float VIEW_NEAR = 1.0f;
@@ -21,9 +31,10 @@ public:
 	{
 		NONE = -1,
 		FIXED_POINT, // 定点カメラ
-		FREE, // フリーモード
+		FREE,    // フリーモード
+		FOLLOW, // 追従モード
 	};
-	
+
 
 	// コンストラクタ
 	Camera(void);
@@ -41,6 +52,8 @@ public:
 	void SetBeforeDraw(void);
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawFree(void);
+	void SetBeforeDrawFollow(void);
+
 
 	// カメラモードの変更
 	void ChangeMode(MODE mode);
@@ -57,10 +70,18 @@ public:
 
 	// 角度の取得
 	const VECTOR& GetAngles(void) const { return angles_; };
-	
-	
+
+	// 注視点の取得
+	const VECTOR& GetTargetPos(void) const { return targetPos_; };
+
+	// 追従相手の設定
+	void SetFollow(Player* follow) { follow_ = follow; };
+
 
 private:
+
+	// 追従相手
+	Player* follow_;
 
 	// カメラモード
 	MODE mode_;
@@ -70,6 +91,9 @@ private:
 
 	// カメラの角度
 	VECTOR angles_;
+
+	// 注視点
+	VECTOR targetPos_;
 	
 	void MoveXYZDirection(void);
 };

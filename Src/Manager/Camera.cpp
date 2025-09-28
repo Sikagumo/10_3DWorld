@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include <DxLib.h>
 #include "../Utility/AsoUtility.h"
+#include "../Object/Player.h"
 #include "../Manager/InputManager.h"
 
 
@@ -44,6 +45,11 @@ void Camera::SetBeforeDraw(void)
 			//SetBeforeDrawFree();
 			MoveXYZDirection();
 		break;
+
+		case Camera::MODE::FOLLOW:
+			SetBeforeDrawFollow();
+			break;
+
 	}
 
 	// カメラの設定(位置と角度による制御)
@@ -59,6 +65,13 @@ void Camera::SetBeforeDraw(void)
 void Camera::SetBeforeDrawFixedPoint(void)
 {
 	// 何もしない
+	// カメラの設定(位置と角度による制御)
+	SetCameraPositionAndAngle(
+		pos_,
+		angles_.x,
+		angles_.y,
+		angles_.z
+	);
 }
 
 void Camera::SetBeforeDrawFree(void)
@@ -83,6 +96,52 @@ void Camera::SetBeforeDrawFree(void)
 	if (input.KeyIsNew(KEY_INPUT_D)) { pos_.x += movePow; }
 	if (input.KeyIsNew(KEY_INPUT_Q)) { pos_.y += movePow; }
 	if (input.KeyIsNew(KEY_INPUT_E)) { pos_.y -= movePow; }
+
+	// カメラの設定(位置と角度による制御)
+	SetCameraPositionAndAngle(
+		pos_,
+		angles_.x,
+		angles_.y,
+		angles_.z
+	);
+
+}
+
+void Camera::SetBeforeDrawFollow(void)
+{
+	auto& input = InputManager::GetInstance();
+
+	// 方向回転によるXYZの移動
+	MoveXYZDirection();
+
+	// カメラの移動
+	// カメラの回転行列を作成
+	MATRIX mat = MGetIdent();
+	mat = MMult(mat, MGetRotX(angles_.x));
+	mat = MMult(mat, MGetRotY(angles_.y));
+	//mat = MMult(mat, MGetRotZ(angles_.z));
+	
+	// 注視点の移動
+	VECTOR followPos = follow_->GetPos();
+	VECTOR targetLocalRotPos = VTransform(FOLLOW_TARGET_LOCAL_POS, mat);
+	targetPos_ = VAdd(followPos, targetLocalRotPos);
+
+	// カメラの移動
+	// 相対座標を回転させて、回転後の相対座標を取得する
+	VECTOR cameraLocalRotPos = VTransform(FOLLOW_CAMERA_LOCAL_POS, mat);
+
+	// 相対座標からワールド座標に直して、カメラ座標とする
+	pos_ = VAdd(followPos, cameraLocalRotPos);
+	
+	// カメラの上方向を計算
+	VECTOR up = VTransform(AsoUtility::DIR_U, mat);
+
+	// カメラの設定(位置と注視点による制御)
+	SetCameraPositionAndTargetAndUpVec(
+		pos_,
+		targetPos_,
+		up
+	);
 }
 
 void Camera::MoveXYZDirection(void)
@@ -102,9 +161,14 @@ void Camera::MoveXYZDirection(void)
 	}
 	else
 	{
-		dir = input.GetAlgKeyDirXZ(0, InputManager::JOYPAD_ALGKEY::RIGHT);
+		float pow = 3.0f;
+		dir = input.GetAlgKeyDirXZ(1, InputManager::JOYPAD_ALGKEY::RIGHT);
+
+		angles_.x += (dir.z * rotPow) * pow;
+		//angles_.y += (dir.x * rotPow) * pow;
 	}
 
+	angles_.y = follow_->GetAngles().y;
 	
 	// WASDでカメラを移動させる
 	const float movePow = 3.0f;
@@ -117,7 +181,7 @@ void Camera::MoveXYZDirection(void)
 		//if (input.KeyIsNew(KEY_INPUT_D)) { dir = { 1.0f, 0.0f, 0.0f }; }
 	}
 
-	if (!AsoUtility::EqualsVZero(dir))
+	/*if (!AsoUtility::EqualsVZero(dir))
 	{
 		// XYZの回転行列
 		// XZ平面移動にする場合は、XZの回転を考慮しないようにする
@@ -125,13 +189,13 @@ void Camera::MoveXYZDirection(void)
 		mat = MMult(mat, MGetRotX(angles_.x));
 		mat = MMult(mat, MGetRotY(angles_.y));
 		//mat = MMult(mat, MGetRotZ(angles_.z));
-		// 
+		
 		// 回転行列を使用して、ベクトルを回転させる
 		VECTOR moveDir = VTransform(dir, mat);
 
 		// 方向×スピードで移動量を作って、座標に足して移動
 		pos_ = VAdd(pos_, VScale(moveDir, movePow));
-	}
+	}*/
 }
 
 
@@ -151,6 +215,9 @@ void Camera::DrawDebug(void)
 		AsoUtility::Rad2DegF(angles_.z)
 	);
 
+	// 注視点
+	DrawSphere3D(targetPos_, 20.0f, 10, 0xff0000, 0xff0000, true);
+
 #endif
 }
 
@@ -166,6 +233,9 @@ void Camera::ChangeMode(MODE mode)
 		break;
 
 	case Camera::MODE::FREE:
+		break;
+
+	case Camera::MODE::FOLLOW:
 		break;
 	}
 }

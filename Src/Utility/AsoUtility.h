@@ -107,6 +107,12 @@ public:
 	static VECTOR Normalize(const Vector2& v);
 	static VECTOR VNormalize(const VECTOR& v);
 
+	// 角度を -π → +π に正規化
+	static float NormalizeAngle(float rad);
+
+	// 角度の線形補間(常に最短経路)
+	static float LerpAngle(float from, float to, float t);
+
 	// 2つのベクトルの間の角度
 	static double AngleDeg(const VECTOR& from, const VECTOR& to);
 

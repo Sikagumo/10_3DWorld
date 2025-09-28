@@ -3,6 +3,7 @@
 class Grid;
 class Stage;
 class Player;
+class Enemy;
 
 class TitleScene : public SceneBase
 {
@@ -28,4 +29,6 @@ private:
 	Stage* stage_;
 
 	Player* player_;
+
+	Enemy* enemy_;
 };

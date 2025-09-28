@@ -18,16 +18,30 @@ Player::Player(void)
 	angles_ = {};
 }
 
-void Player::Init(void)
+void Player::InitLoad(void)
 {
 	modelId_ = MV1LoadModel((ResourceManager::PATH_MODEL + "Player/Player.mv1").c_str());
 	//modelId_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_PLAYER);
+}
+void Player::InitTransform(void)
+{
+	angles_ = {};
+
+	scales_ = { 1.0f, 1.0f, 1.0f };
+
+	// 角度から方向に変換する
+	moveDir_ = { sinf(angles_.y), 0.0f, cosf(angles_.y) };
+
+
+	MATRIX mat = MatrixUtility::Multiplication(LOCAL_ANGLES, angles_);
+
+	// 回転行列をモデルに反映
+	MV1SetRotationMatrix(modelId_, mat);
 
 	pos_ = {};
-	SetMatrixPlayer();
 
-	InitAnim();
-	InitDice();
+	// モデルの位置設定
+	MV1SetPosition(modelId_, pos_);
 }
 void Player::InitAnim(void)
 {
@@ -43,8 +57,13 @@ void Player::InitAnim(void)
 	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
 		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
-	animType_ = ANIM_TYPE::IDLE;
-	anim_->Play(static_cast<int>(animType_));
+	// 歩行アニメーション有効
+	ChangeAnim(ANIM_TYPE::IDLE);
+}
+void Player::InitPost(void)
+{
+	// ダイス初期化
+	InitDice();
 }
 void Player::InitDice(void)
 {
@@ -63,12 +82,18 @@ void Player::InitDice(void)
 
 void Player::Update(void)
 {
-	
-	MV1SetPosition(modelId_, pos_);
+	// プレイヤーの遅延回転処理
+	DelayRotate();
 
-	SetMatrixPlayer();
+
+	MATRIX mat = MatrixUtility::Multiplication(LOCAL_ANGLES, angles_);
+
+	// 回転行列をモデルに反映
+	MV1SetRotationMatrix(modelId_, mat);
 
 	Move();
+	// モデルの位置設定
+	MV1SetPosition(modelId_, pos_);
 
 	anim_->Update();
 
@@ -100,23 +125,10 @@ void Player::SyncDice(void)
 	MV1SetPosition(dice_.modelId, dice_.pos);
 }
 
-void Player::SetMatrixPlayer(void)
-{
-	MATRIX mat = MGetIdent();
-	mat = MatrixUtility::Multiplication(LOCAL_ANGLES, angles_);
-
-	// 回転行列をモデルに反映
-	MV1SetRotationMatrix(modelId_, mat);
-
-	// モデルの位置設定
-	MV1SetPosition(modelId_, pos_);
-}
-
 void Player::Move(void)
 {
 	InputManager& input = InputManager::GetInstance();
 
-	float speed = 3.0f;
 	VECTOR dir = {};
 	VECTOR cameraAngle = SceneManager::GetInstance().GetCamera().GetAngles();
 
@@ -133,6 +145,7 @@ void Player::Move(void)
 	}
 
 	
+	const float movePow = 3.0f;
 
 	if (!AsoUtility::EqualsVZero(dir))
 	{
@@ -142,27 +155,30 @@ void Player::Move(void)
 		mat = MMult(mat, MGetRotY(angles_.y));
 		//mat = MMult(mat, MGetRotZ(angles_.z));
 
-		VECTOR moveDir = VTransform(dir, mat);
+		// 回転行列を使用して、ベクトルを回転させる
+		moveDir_ = VTransform(dir, mat);
 
-		pos_ = VAdd(pos_, VScale(moveDir, speed));
+		// 移動方向から角度に変換する
+		//angles_.y = atan2f(moveDir_.x, moveDir_.z);
+		
+		// 方向×スピードで移動量を作って、座標に足して移動
+		pos_ = VAdd(pos_, VScale(moveDir_, movePow));
+
+		// 歩行アニメーション有効
+		ChangeAnim(ANIM_TYPE::WALK);
+	}
+	else
+	{
+		// 待機アニメーション有効
+		ChangeAnim(ANIM_TYPE::IDLE);
 	}
 
 
 	//float rot = 2.5f;
 	//if (input.KeyIsNew(KEY_INPUT_LEFT)) { angles_.y -= (rot * (DX_PI_F / 180.0f)); }
 	//if (input.KeyIsNew(KEY_INPUT_RIGHT)) { angles_.y += (rot * (DX_PI_F / 180.0f)); }
-
-	if (input.KeyIsNewAll() && animType_ != ANIM_TYPE::WALK)
-	{
-		animType_ = ANIM_TYPE::WALK;
-		anim_->Play(static_cast<int>(animType_));
-	}
-	if (!input.KeyIsNewAll() && animType_ != ANIM_TYPE::IDLE)
-	{
-		animType_ = ANIM_TYPE::IDLE;
-		anim_->Play(static_cast<int>(animType_));
-	}
 }
+
 
 void Player::Draw(void)
 {
@@ -198,4 +214,32 @@ void Player::Release(void)
 {
 	anim_->Release();
 	delete anim_;
+}
+
+
+void Player::DelayRotate(void)
+{
+	// 移動方向から角度に変換する
+	float goal = atan2f(moveDir_.x, moveDir_.z);
+
+	// 常に最短経路で補間
+	angles_.y = AsoUtility::LerpAngle(angles_.y, goal, ROT_SPEED);
+
+	// 等間隔補間
+	// 1frame. a = Lerp(0, 10, 0.1late) = 1
+	// 2frame. a = Lerp(0, 10, 0.2late) = 2
+	// 3frame. a = Lerp(0, 10, 0.3late) = 3
+
+	// ゴールに近づくほどゆっくり補間
+	// a = 0
+	// 1frame. a = Lerp(a, 10, 0.1) = 1
+	// 2frame. a = Lerp(a, 10, 0.1) = (10 - 1 = 9)
+	// 3frame. a = Lerp(a, 10, 0.1) = 3
+}
+
+void Player::ChangeAnim(ANIM_TYPE type, bool isLoop)
+{
+	// アニメーション遷移処理
+	animType_ = static_cast<int>(type);
+	anim_->Play(animType_, isLoop);
 }
