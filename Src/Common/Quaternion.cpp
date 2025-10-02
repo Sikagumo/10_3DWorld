@@ -550,7 +550,7 @@ Quaternion Quaternion::FromToRotation(VECTOR fromDir, VECTOR toDir)
 	}
 
 	axis = AsoUtility::VNormalize(axis);
-	return Quaternion::AngleAxis(AsoUtility::Deg2RadD(angle), axis);
+	return Quaternion::AngleAxis(AsoUtility::Deg2Rad(angle), axis);
 
 }
 

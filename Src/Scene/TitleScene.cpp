@@ -32,7 +32,7 @@ void TitleScene::Init(void)
 	player_ = new Player();
 	player_->Init();
 
-	enemy_ = new Enemy();
+	enemy_ = new Enemy(player_);
 	enemy_->Init();
 
 	Camera& camera = SceneManager::GetInstance().GetCamera();

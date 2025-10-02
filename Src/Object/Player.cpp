@@ -16,6 +16,7 @@ Player::Player(void)
 	modelId_ = -1;
 	pos_ = {};
 	angles_ = {};
+	autoAngles_ = {};
 }
 
 void Player::InitLoad(void)
@@ -64,17 +65,21 @@ void Player::InitPost(void)
 {
 	// ダイス初期化
 	InitDice();
+
+	autoAngles_ = {};
 }
 void Player::InitDice(void)
 {
 	dice_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_DICE);
 	float scale = 0.1f;
 	dice_.scales = { scale, scale, scale };
-	dice_.localPos = { 200.0f, 100.0f, 0.0f };
+	//dice.localPos = { 200.0f, 100.0f, 0.0f };
+	dice_.localPos = { 0.0f, 100.0f, 200.0f };
 	dice_.pos = VAdd(pos_, dice_.localPos);
 
 	MV1SetScale(dice_.modelId, dice_.scales);
 	MV1SetPosition(dice_.modelId, dice_.pos);
+
 
 	SyncDice();
 }
@@ -97,6 +102,8 @@ void Player::Update(void)
 
 	anim_->Update();
 
+
+	autoAngles_.y += 0.01f;
 	SyncDice();
 }
 void Player::SyncDice(void)
@@ -108,7 +115,9 @@ void Player::SyncDice(void)
 	MATRIX selfMat = MatrixUtility::Multiplication(dice_.localAngles, dice_.angles);
 
 	// 親(プレイヤー)の回転行列
-	MATRIX parentMat = MatrixUtility::GetMatrixRotateXYZ(angles_);
+	//MATRIX parentMat = MatrixUtility::GetMatrixRotateXYZ(angles_);
+	// 自動回転
+	MATRIX parentMat = MatrixUtility::GetMatrixRotateXYZ(autoAngles_);
 
 	MATRIX mat = MatrixUtility::Multiplication(selfMat, parentMat);
 
@@ -185,6 +194,8 @@ void Player::Draw(void)
 	MV1DrawModel(modelId_);
 
 	MV1DrawModel(dice_.modelId);
+
+	DrawDicePractice();	
 }
 
 void Player::DrawDebug(void)
@@ -193,17 +204,17 @@ void Player::DrawDebug(void)
 	DrawFormatString(
 		0, 64, 0xffffff,
 		"キャラ角度　 ：(% .1f°, % .1f°, % .1f°)",
-		AsoUtility::Rad2DegF(angles_.x),
-		AsoUtility::Rad2DegF(angles_.y),
-		AsoUtility::Rad2DegF(angles_.z)
+		AsoUtility::Rad2Deg(angles_.x),
+		AsoUtility::Rad2Deg(angles_.y),
+		AsoUtility::Rad2Deg(angles_.z)
 	);
 
 	DrawFormatString(
 		0, 80, 0xffffff,
 		"ダイス角度　 ：(% .1f°, % .1f°, % .1f°)",
-		AsoUtility::Rad2DegF(dice_.angles.x),
-		AsoUtility::Rad2DegF(dice_.angles.y),
-		AsoUtility::Rad2DegF(dice_.angles.z)
+		AsoUtility::Rad2Deg(dice_.angles.x),
+		AsoUtility::Rad2Deg(dice_.angles.y),
+		AsoUtility::Rad2Deg(dice_.angles.z)
 	);
 
 
@@ -235,6 +246,40 @@ void Player::DelayRotate(void)
 	// 1frame. a = Lerp(a, 10, 0.1) = 1
 	// 2frame. a = Lerp(a, 10, 0.1) = (10 - 1 = 9)
 	// 3frame. a = Lerp(a, 10, 0.1) = 3
+}
+
+void Player::DrawDicePractice(void)
+{
+	// プレイヤー座標
+	VECTOR playerPos = pos_;
+	playerPos.y = 10.0f;
+
+	// サイコロ座標
+	VECTOR dicePos = dice_.pos;
+	dicePos.y = 10.0f;
+
+	// 角度と方向の演習
+	// サイコロの下線描画
+	DrawLine3D(dice_.pos, dicePos, 0x00ff00);
+
+	// プレイヤーとサイコロ間の線描画
+	DrawLine3D(playerPos, dicePos, 0xffffff);
+
+	// プレイヤーの前方方向線描画
+	DrawLine3D(playerPos, VAdd(playerPos, VScale(moveDir_, 200.0f)), 0xcc44cc);
+
+	DrawFormatString(0, 96, 0xffffff, "■サイコロ");
+	DrawFormatString(0, 96 + 16, 0xffffff, "ワールド座標(%.1f°,%.1f°,%.1f°)"
+		, AsoUtility::Rad2Deg(autoAngles_.x)
+		, AsoUtility::Rad2Deg(autoAngles_.y)
+		, AsoUtility::Rad2Deg(autoAngles_.z));
+
+	float diff = AsoUtility::RadIn2PI(angles_.y) - AsoUtility::RadIn2PI(autoAngles_.y);
+
+	DrawFormatString(0, 96 + 32, 0xffffff, "ワールド座標(%.1f°,%.1f°,%.1f°)"
+		, 0.0f
+		, AsoUtility::Rad2Deg(diff)
+		, 0.0f);
 }
 
 void Player::ChangeAnim(ANIM_TYPE type, bool isLoop)

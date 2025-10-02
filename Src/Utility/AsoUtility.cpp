@@ -26,32 +26,32 @@ std::vector<std::string> AsoUtility::Split(std::string& line, char delimiter)
 
 }
 
-double AsoUtility::Rad2DegD(double rad)
+double AsoUtility::Rad2Deg(double rad)
 {
     return rad * (180.0 / DX_PI);
 }
 
-float AsoUtility::Rad2DegF(float rad)
+float AsoUtility::Rad2Deg(float rad)
 {
     return rad * (180.0f / DX_PI_F);
 }
 
-int AsoUtility::Rad2DegI(int rad)
+int AsoUtility::Rad2Deg(int rad)
 {
     return rad * Round(180.0f / DX_PI_F);
 }
 
-double AsoUtility::Deg2RadD(double deg)
+double AsoUtility::Deg2Rad(double deg)
 {
     return deg * (DX_PI / 180.0);
 }
 
-float AsoUtility::Deg2RadF(float deg)
+float AsoUtility::Deg2Rad(float deg)
 {
     return deg * (DX_PI_F / 180.0f);
 }
 
-int AsoUtility::Deg2RadI(int deg)
+int AsoUtility::Deg2Rad(int deg)
 {
     return deg * Round(DX_PI_F / 180.0f);
 }

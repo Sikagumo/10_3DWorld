@@ -210,9 +210,9 @@ void Camera::DrawDebug(void)
 	DrawFormatString(
 		0, 30, 0xffffff,
 		"カメラ角度　 ：(% .1f, % .1f, % .1f)",
-		AsoUtility::Rad2DegF(angles_.x),
-		AsoUtility::Rad2DegF(angles_.y),
-		AsoUtility::Rad2DegF(angles_.z)
+		AsoUtility::Rad2Deg(angles_.x),
+		AsoUtility::Rad2Deg(angles_.y),
+		AsoUtility::Rad2Deg(angles_.z)
 	);
 
 	// 注視点

@@ -52,6 +52,8 @@ private:
 	};
 	Dice dice_;
 
+	VECTOR autoAngles_;
+
 
 	void InitLoad(void)override;
 
@@ -69,6 +71,8 @@ private:
 
 	// プレイヤーの遅延回転処理
 	void DelayRotate(void);
+
+	void DrawDicePractice(void);
 
 	/// <summary>
 	/// アニメーション遷移処理
