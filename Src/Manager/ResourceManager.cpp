@@ -52,9 +52,10 @@ void ResourceManager::SetResources(void)
 	/*　リソースを取得する処理　*/
 
 	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_PLAYER, (PATH_MODEL + "Player/Player.mv1").c_str());
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_IDLE, (PATH_MODEL + "Player/Idle.mv1").c_str());
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_THROW, (PATH_MODEL + "Player/Throw.mv1").c_str());
-	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_WALK, (PATH_MODEL + "Player/Walk.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::ANIM_IDLE, (PATH_MODEL + "Player/Idle.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::ANIM_THROW, (PATH_MODEL + "Player/Throw.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::ANIM_WALK, (PATH_MODEL + "Player/Walk.mv1").c_str());
+	SetResource(Resource::LOAD_TYPE::MODEL, SRC::ANIM_RUN, (PATH_MODEL + "Player/Run.mv1").c_str());
 
 	SetResource(Resource::LOAD_TYPE::MODEL, SRC::MODEL_SHOT, (PATH_MODEL + "Shot/Bomb.mv1").c_str());
 

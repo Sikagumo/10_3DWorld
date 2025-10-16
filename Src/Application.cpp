@@ -1,8 +1,9 @@
-#include <DxLib.h>
-#include "Manager/InputManager.h"
-#include "Manager/SceneManager.h"
-#include "Manager/ResourceManager.h"
 #include "Application.h"
+#include <DxLib.h>
+#include "./Manager/InputManager.h"
+#include "./Manager/SceneManager.h"
+#include "./Manager/ResourceManager.h"
+#include "./Common/FrameRate.h"
 
 Application* Application::instance_ = nullptr;
 
@@ -26,7 +27,7 @@ void Application::Init(void)
 {
 
 	// アプリケーションの初期設定
-	SetWindowText("3DWorld");
+	SetWindowText("2416026_中川原諒");
 
 	// ウィンドウサイズ
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);
@@ -61,31 +62,39 @@ void Application::Init(void)
 	// シーン管理初期化
 	SceneManager::CreateInstance();
 
+	FrameRate::CreateInstance();
 }
 
 void Application::Run(void)
 {
 	InputManager& inputManager = InputManager::GetInstance();
 	SceneManager& sceneManager = SceneManager::GetInstance();
+	FrameRate& fps = FrameRate::GetInstance();
 
 	// ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
+		fps.Update();
+		if (fps.GetLimitFrameRate() == false)
+		{
+			fps.SetFrameRate();
 
-		inputManager.Update();
-		sceneManager.Update();
+			inputManager.Update();
+			sceneManager.Update();
 
-		sceneManager.Draw();
+			sceneManager.Draw();
 
-		ScreenFlip();
-
+			ScreenFlip();
+		}
 	}
 
 }
 
 void Application::Destroy(void)
 {
-
+	// フレームレート解放
+	FrameRate::GetInstance().Destroy();
+	
 	// シーン管理解放
 	SceneManager::GetInstance().Destroy();
 

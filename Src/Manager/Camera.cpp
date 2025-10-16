@@ -51,15 +51,6 @@ void Camera::SetBeforeDraw(void)
 			break;
 
 	}
-
-	// カメラの設定(位置と角度による制御)
-	SetCameraPositionAndAngle(
-		pos_,
-		angles_.x,
-		angles_.y,
-		angles_.z
-	);
-
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)
@@ -149,7 +140,7 @@ void Camera::MoveXYZDirection(void)
 	auto& input = InputManager::GetInstance();
 	
 	// 矢印キーでカメラの角度を変える
-	float rotPow = 1.0f * DX_PI_F / 180.0f;
+	float rotPow = (3.0f * (DX_PI_F / 180.0f));
 	VECTOR dir = {};
 
 	if (GetJoypadNum() == 0)
@@ -161,14 +152,25 @@ void Camera::MoveXYZDirection(void)
 	}
 	else
 	{
-		float pow = 3.0f;
 		dir = input.GetAlgKeyDirXZ(1, InputManager::JOYPAD_ALGKEY::RIGHT);
 
-		angles_.x += (dir.z * rotPow) * pow;
-		//angles_.y += (dir.x * rotPow) * pow;
+		angles_.x += (dir.z * rotPow);
+		angles_.y += (dir.x * rotPow);
 	}
 
-	angles_.y = follow_->GetAngles().y;
+	/*
+	// X軸の回転の絶対値が一定のとき。制限する
+	float angX = ((angles_.x > 0.0f) ? angles_.x : -angles_.x);
+	if (angX > ROT_LIMIT_X)
+	{
+		// 絶対値を戻して値を制限する
+		angX = ((angles_.x > 0.0f) ? angX : -angX);
+		angles_.x = angX;
+	}*/
+
+
+	// プレイヤーの後方を追従
+	//angles_.y = follow_->GetAngles().y;
 	
 	// WASDでカメラを移動させる
 	const float movePow = 3.0f;
@@ -181,12 +183,12 @@ void Camera::MoveXYZDirection(void)
 		//if (input.KeyIsNew(KEY_INPUT_D)) { dir = { 1.0f, 0.0f, 0.0f }; }
 	}
 
-	/*if (!AsoUtility::EqualsVZero(dir))
+	if (!AsoUtility::EqualsVZero(dir))
 	{
 		// XYZの回転行列
 		// XZ平面移動にする場合は、XZの回転を考慮しないようにする
 		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotX(angles_.x));
+		//mat = MMult(mat, MGetRotX(angles_.x));
 		mat = MMult(mat, MGetRotY(angles_.y));
 		//mat = MMult(mat, MGetRotZ(angles_.z));
 		
@@ -194,8 +196,8 @@ void Camera::MoveXYZDirection(void)
 		VECTOR moveDir = VTransform(dir, mat);
 
 		// 方向×スピードで移動量を作って、座標に足して移動
-		pos_ = VAdd(pos_, VScale(moveDir, movePow));
-	}*/
+		//pos_ = VAdd(pos_, VScale(moveDir, movePow));
+	}
 }
 
 
@@ -214,9 +216,18 @@ void Camera::DrawDebug(void)
 		AsoUtility::Rad2Deg(angles_.y),
 		AsoUtility::Rad2Deg(angles_.z)
 	);
+	DrawFormatString(
+		0, 46, 0xffffff,
+		"追従位置：(%.1f, %.1f, %.1f)",
+		targetPos_.x,
+		targetPos_.y,
+		targetPos_.z);
 
-	// 注視点
-	DrawSphere3D(targetPos_, 20.0f, 10, 0xff0000, 0xff0000, true);
+	if (mode_ == MODE::FOLLOW)
+	{
+		// 注視点
+		DrawSphere3D(targetPos_, 20.0f, 10, 0xff0000, 0xff0000, true);
+	}
 
 #endif
 }

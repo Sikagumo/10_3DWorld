@@ -60,7 +60,7 @@ void TitleScene::Update(void)
 void TitleScene::Draw(void)
 {
 	// ステージ描画
-	stage_->Draw();
+	//stage_->Draw();
 
 #ifdef _DEBUG
 	// グリッド描画

@@ -21,13 +21,15 @@ public:
 		/*　3Dモデルリソース　*/
 
 		MODEL_PLAYER,
-		MODEL_IDLE,
-		MODEL_THROW,
-		MODEL_WALK,
 		MODEL_SHOT,
 		MODEL_DICE,
 		MODEL_CAMERA,
 		MODEL_STAGE,
+
+		ANIM_IDLE,
+		ANIM_THROW,
+		ANIM_WALK,
+		ANIM_RUN,
 	};
 
 

@@ -4,6 +4,7 @@
 #include "../Utility/AsoUtility.h"
 #include "../Utility/MatrixUtility.h"
 #include "./AnimationController.h"
+#include "../Manager/Camera.h"
 #include "../Manager/ResourceManager.h"
 #include "../Manager/Resource.h"
 #include "../Manager/InputManager.h"
@@ -55,8 +56,11 @@ void Player::InitAnim(void)
 	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
 		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
+	anim_->Add(static_cast<int>(ANIM_TYPE::THROW),
 		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
+
+	anim_->Add(static_cast<int>(ANIM_TYPE::RUN),
+		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Run.mv1").c_str());
 
 	// 歩行アニメーション有効
 	ChangeAnim(ANIM_TYPE::IDLE);
@@ -139,7 +143,6 @@ void Player::Move(void)
 	InputManager& input = InputManager::GetInstance();
 
 	VECTOR dir = {};
-	VECTOR cameraAngle = SceneManager::GetInstance().GetCamera().GetAngles();
 
 	if (GetJoypadNum() == 0)
 	{
@@ -152,29 +155,41 @@ void Player::Move(void)
 	{
 		dir = input.GetAlgKeyDirXZ(1, InputManager::JOYPAD_ALGKEY::LEFT);
 	}
-
 	
-	const float movePow = 3.0f;
-
 	if (!AsoUtility::EqualsVZero(dir))
 	{
-		MATRIX mat = MGetIdent();
+		// カメラの方向で進行
+		const VECTOR& cameraAngle = SceneManager::GetInstance().GetCamera().GetAngles();
+		MATRIX cameraMat = MatrixUtility::GetMatrixRotateXYZ(cameraAngle);
 
+		moveDir_ = VTransform(dir, cameraMat);
+
+		/* // プレイヤーの向きで進行
+		MATRIX mat = MGetIdent();
 		//mat = MMult(mat, MGetRotX(angles_.x));
 		mat = MMult(mat, MGetRotY(angles_.y));
 		//mat = MMult(mat, MGetRotZ(angles_.z));
 
 		// 回転行列を使用して、ベクトルを回転させる
 		moveDir_ = VTransform(dir, mat);
-
+		
 		// 移動方向から角度に変換する
 		//angles_.y = atan2f(moveDir_.x, moveDir_.z);
-		
-		// 方向×スピードで移動量を作って、座標に足して移動
-		pos_ = VAdd(pos_, VScale(moveDir_, movePow));
+		*/
 
-		// 歩行アニメーション有効
-		ChangeAnim(ANIM_TYPE::WALK);
+		// 方向×スピードで移動量を作って、座標に足して移動
+		pos_ = VAdd(pos_, VScale(moveDir_, MOVE_SPEED));
+
+
+		if (input.KeyIsNew(KEY_INPUT_LSHIFT))
+		{
+			//ChangeAnim(ANIM_TYPE::RUN);
+		}
+		else
+		{
+			// 歩行アニメーション有効
+			ChangeAnim(ANIM_TYPE::WALK);
+		}
 	}
 	else
 	{
@@ -203,7 +218,10 @@ void Player::DrawDebug(void)
 #ifdef _DEBUG
 	DrawFormatString(
 		0, 64, 0xffffff,
-		"キャラ角度　 ：(% .1f°, % .1f°, % .1f°)",
+		"キャラ位置(%.1f, %.1f, %.1f), 角度　 ：(% .1f°, % .1f°, % .1f°)",
+		pos_.x, 
+		pos_.y, 
+		pos_.z, 
 		AsoUtility::Rad2Deg(angles_.x),
 		AsoUtility::Rad2Deg(angles_.y),
 		AsoUtility::Rad2Deg(angles_.z)
@@ -268,6 +286,7 @@ void Player::DrawDicePractice(void)
 	// プレイヤーの前方方向線描画
 	DrawLine3D(playerPos, VAdd(playerPos, VScale(moveDir_, 200.0f)), 0xcc44cc);
 
+#ifdef _DEBUG
 	DrawFormatString(0, 96, 0xffffff, "■サイコロ");
 	DrawFormatString(0, 96 + 16, 0xffffff, "ワールド座標(%.1f°,%.1f°,%.1f°)"
 		, AsoUtility::Rad2Deg(autoAngles_.x)
@@ -280,6 +299,7 @@ void Player::DrawDicePractice(void)
 		, 0.0f
 		, AsoUtility::Rad2Deg(diff)
 		, 0.0f);
+#endif
 }
 
 void Player::ChangeAnim(ANIM_TYPE type, bool isLoop)

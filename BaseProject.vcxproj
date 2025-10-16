@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Src\Application.cpp" />
     <ClCompile Include="Src\Common\Fader.cpp" />
+    <ClCompile Include="Src\Common\FrameRate.cpp" />
     <ClCompile Include="Src\Common\Quaternion.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Manager\Camera.cpp" />
@@ -44,6 +45,7 @@
   <ItemGroup>
     <ClInclude Include="Src\Application.h" />
     <ClInclude Include="Src\Common\Fader.h" />
+    <ClInclude Include="Src\Common\FrameRate.h" />
     <ClInclude Include="Src\Common\Quaternion.h" />
     <ClInclude Include="Src\main.h" />
     <ClInclude Include="Src\Manager\Camera.h" />

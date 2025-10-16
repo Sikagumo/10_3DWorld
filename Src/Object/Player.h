@@ -12,7 +12,10 @@ public:
 	static constexpr VECTOR LOCAL_ANGLES = { 0.0f, 180.0f * (DX_PI_F / 180.0f), 0.0f };
 
 	// 回転速度
-	static constexpr float ROT_SPEED = 0.1f;
+	static constexpr float ROT_SPEED = (10.0f * (DX_PI_F / 180.0f));
+
+	// 移動速度
+	static constexpr float MOVE_SPEED = 5.0f;
 
 	// アニメーション種別
 	enum class ANIM_TYPE
@@ -20,6 +23,7 @@ public:
 		IDLE,
 		WALK,
 		THROW,
+		RUN,
 		MAX,
 	};
 

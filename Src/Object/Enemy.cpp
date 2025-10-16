@@ -6,7 +6,6 @@
 #include "./AnimationController.h"
 #include "./Player.h"
 #include "../Manager/ResourceManager.h"
-#include "../Manager/Resource.h"
 
 Enemy::Enemy(Player* player)
 {
@@ -55,7 +54,7 @@ void Enemy::InitAnim(void)
 	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
 		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
+	anim_->Add(static_cast<int>(ANIM_TYPE::THROW),
 		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
 	// 歩行アニメーション有効
@@ -89,7 +88,7 @@ void Enemy::Draw(void)
 }
 void Enemy::DrawViewRange(void)
 {
-	unsigned int color = ((isNoticeVision_) ? 0x000000 : 0xffff00);
+	unsigned int color = ((isNoticeVision_) ? 0xff0000 : 0x00aaff);
 
 	MATRIX mat = MatrixUtility::GetMatrixRotateXYZ(angles_);
 
@@ -123,7 +122,7 @@ void Enemy::DrawViewRange(void)
 
 void Enemy::DrawSearchRange(void)
 {
-	unsigned int color = ((isNoticeHearing_) ? 0xff0000 : 0x00ffff);
+	unsigned int color = ((isNoticeHearing_) ? 0xffff00 : 0x00aaaa);
 	MATRIX mat = MatrixUtility::GetMatrixRotateXYZ(angles_);
 
 	int split = 36;
@@ -205,4 +204,3 @@ void Enemy::SearchField(void)
 	// 視野左右内に入っている
 	isNoticeHearing_ = (diff <= (VIEW_RANGE * VIEW_RANGE));
 }
-
