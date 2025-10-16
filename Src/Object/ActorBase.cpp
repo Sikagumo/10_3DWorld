@@ -57,7 +57,6 @@ void ActorBase::Draw(void)
 
 void ActorBase::Release(void)
 {
-	MV1DeleteModel(modelId_);
 	delete anim_;
 }
 
