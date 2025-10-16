@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <DxLib.h>
 class SceneBase;
 class Fader;
 class Camera;
@@ -60,6 +61,8 @@ public:
 	// カメラの取得
 	Camera& GetCamera(void) const { return *camera_; };
 
+	bool GetIsDebugMode(void)const { return isDebugMode_; };
+
 
 private:
 
@@ -83,6 +86,9 @@ private:
 
 	// シーン遷移中判定
 	bool isSceneChanging_;
+
+	// デバッグモード
+	bool isDebugMode_;
 
 	// デルタタイム
 	std::chrono::system_clock::time_point preTime_;

@@ -11,7 +11,9 @@ void Stage::Init(void)
 {
 	modelId_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_STAGE);
 
-	MV1SetPosition(modelId_, pos_);
+	VECTOR pos = VAdd(pos_, LOCAL_POS);
+
+	MV1SetPosition(modelId_, pos);
 }
 
 void Stage::Update(void)

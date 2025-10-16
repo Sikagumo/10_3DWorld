@@ -1,10 +1,12 @@
+#include "SceneManager.h"
 #include <chrono>
 #include <DxLib.h>
 #include "../Common/Fader.h"
 #include "../Scene/TitleScene.h"
-#include "Camera.h"
-#include "MiniCamera.h"
-#include "SceneManager.h"
+#include "./Camera.h"
+#include "./MiniCamera.h"
+#include "./InputManager.h"
+#include "../Application.h"
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -36,13 +38,12 @@ void SceneManager::Init(void)
 	camera_ = new Camera();
 	camera_->Init();
 
-	scene_ = new TitleScene();
-	scene_->Init();
-
 	miniCamera_ = new MiniCamera(camera_);
 	miniCamera_->Init();
 
 	isSceneChanging_ = false;
+
+	isDebugMode_ = false;
 
 	// デルタタイム
 	preTime_ = std::chrono::system_clock::now();
@@ -108,6 +109,12 @@ void SceneManager::Update(void)
 		scene_->Update();
 	}
 
+	// デバッグモード変更
+	if (InputManager::GetInstance().KeyIsTrgDown(KEY_INPUT_TAB))
+	{
+		isDebugMode_ = ((!isDebugMode_) ? true : false);
+	}
+
 	// カメラ
 	camera_->Update();
 
@@ -141,6 +148,10 @@ void SceneManager::Draw(void)
 	// 暗転・明転
 	fader_->Draw();
 
+	if (isDebugMode_)
+	{
+		DrawString(Application::SCREEN_SIZE_X - 200, 0, "デバッグモード有効中", 0xff0000);
+	}
 }
 
 void SceneManager::Destroy(void)

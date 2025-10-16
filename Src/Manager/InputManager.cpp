@@ -60,6 +60,7 @@ void InputManager::SetInputKey(void)
 	AddKey(KEY_INPUT_ESCAPE);
 	AddKey(KEY_INPUT_LSHIFT);
 	AddKey(KEY_INPUT_RSHIFT);
+	AddKey(KEY_INPUT_TAB);
 }
 
 void InputManager::SetInputMouse(void)

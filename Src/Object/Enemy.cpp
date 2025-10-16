@@ -6,6 +6,7 @@
 #include "./AnimationController.h"
 #include "./Player.h"
 #include "../Manager/ResourceManager.h"
+#include "../Manager/SceneManager.h"
 
 Enemy::Enemy(Player* player)
 {
@@ -18,7 +19,7 @@ Enemy::Enemy(Player* player)
 
 void Enemy::InitLoad(void)
 {
-	modelId_ = MV1LoadModel((ResourceManager::PATH_MODEL + "Player/Player.mv1").c_str());
+	modelId_ = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER);
 }
 
 void Enemy::InitTransform(void)
@@ -82,9 +83,12 @@ void Enemy::Draw(void)
 {
 	ActorBase::Draw();
 
-	DrawSearchRange();
+	if (SceneManager::GetInstance().GetIsDebugMode())
+	{
+		DrawSearchRange();
 
-	DrawViewRange();
+		DrawViewRange();
+	}
 }
 void Enemy::DrawViewRange(void)
 {

@@ -5,6 +5,8 @@ class Stage
 {
 public:
 
+	static constexpr VECTOR LOCAL_POS = { 0.0f, 62.5f, 0.0f };
+
 	Stage(void);
 
 	~Stage(void) = default;

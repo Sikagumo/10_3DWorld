@@ -12,7 +12,7 @@ public:
 	static constexpr VECTOR LOCAL_ANGLES = { 0.0f, 180.0f * (DX_PI_F / 180.0f), 0.0f };
 
 	// ‰ñ“]‘¬“x
-	static constexpr float ROT_SPEED = (10.0f * (DX_PI_F / 180.0f));
+	static constexpr float ROT_SPEED = (5.0f * (DX_PI_F / 180.0f));
 
 	// ˆÚ“®‘¬“x
 	static constexpr float MOVE_SPEED = 5.0f;

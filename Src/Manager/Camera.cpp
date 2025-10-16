@@ -3,6 +3,7 @@
 #include "../Utility/AsoUtility.h"
 #include "../Object/Player.h"
 #include "../Manager/InputManager.h"
+#include "../Manager/SceneManager.h"
 
 
 Camera::Camera(void)
@@ -158,15 +159,15 @@ void Camera::MoveXYZDirection(void)
 		angles_.y += (dir.x * rotPow);
 	}
 
-	/*
+	
 	// X軸の回転の絶対値が一定のとき。制限する
 	float angX = ((angles_.x > 0.0f) ? angles_.x : -angles_.x);
 	if (angX > ROT_LIMIT_X)
 	{
 		// 絶対値を戻して値を制限する
-		angX = ((angles_.x > 0.0f) ? angX : -angX);
-		angles_.x = angX;
-	}*/
+		angX = ROT_LIMIT_X;
+		angles_.x = ((angles_.x > 0.0f) ? angX : -angX);
+	}
 
 
 	// プレイヤーの後方を追従
@@ -203,6 +204,8 @@ void Camera::MoveXYZDirection(void)
 
 void Camera::DrawDebug(void)
 {
+	if (!SceneManager::GetInstance().GetIsDebugMode())return;
+
 #ifdef _DEBUG
 	DrawFormatString(
 		0, 10, 0xffffff,
@@ -211,7 +214,7 @@ void Camera::DrawDebug(void)
 	);
 	DrawFormatString(
 		0, 30, 0xffffff,
-		"カメラ角度　 ：(% .1f, % .1f, % .1f)",
+		"カメラ角度　 ：(% .1f°, % .1f°, % .1f°)",
 		AsoUtility::Rad2Deg(angles_.x),
 		AsoUtility::Rad2Deg(angles_.y),
 		AsoUtility::Rad2Deg(angles_.z)
@@ -222,14 +225,13 @@ void Camera::DrawDebug(void)
 		targetPos_.x,
 		targetPos_.y,
 		targetPos_.z);
+#endif
 
 	if (mode_ == MODE::FOLLOW)
 	{
 		// 注視点
 		DrawSphere3D(targetPos_, 20.0f, 10, 0xff0000, 0xff0000, true);
 	}
-
-#endif
 }
 
 void Camera::ChangeMode(MODE mode)

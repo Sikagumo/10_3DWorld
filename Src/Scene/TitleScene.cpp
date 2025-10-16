@@ -59,12 +59,17 @@ void TitleScene::Update(void)
 
 void TitleScene::Draw(void)
 {
+	bool isDebug = SceneManager::GetInstance().GetIsDebugMode();
+
 	// ステージ描画
-	//stage_->Draw();
+	stage_->Draw();
 
 #ifdef _DEBUG
-	// グリッド描画
-	grid_->Draw();
+	if (isDebug)
+	{
+		// グリッド描画
+		grid_->Draw();
+	}
 #endif
 
 	player_->Draw();

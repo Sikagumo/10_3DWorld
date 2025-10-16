@@ -22,9 +22,9 @@ Player::Player(void)
 
 void Player::InitLoad(void)
 {
-	modelId_ = MV1LoadModel((ResourceManager::PATH_MODEL + "Player/Player.mv1").c_str());
-	//modelId_ = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_PLAYER);
+	modelId_ = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER);
 }
+
 void Player::InitTransform(void)
 {
 	angles_ = {};
@@ -159,7 +159,8 @@ void Player::Move(void)
 	if (!AsoUtility::EqualsVZero(dir))
 	{
 		// カメラの方向で進行
-		const VECTOR& cameraAngle = SceneManager::GetInstance().GetCamera().GetAngles();
+		VECTOR cameraAngle = SceneManager::GetInstance().GetCamera().GetAngles();
+		cameraAngle.x = 0.0f;
 		MATRIX cameraMat = MatrixUtility::GetMatrixRotateXYZ(cameraAngle);
 
 		moveDir_ = VTransform(dir, cameraMat);
@@ -210,18 +211,19 @@ void Player::Draw(void)
 
 	MV1DrawModel(dice_.modelId);
 
-	DrawDicePractice();	
+	if (SceneManager::GetInstance().GetIsDebugMode())
+	{
+		DrawDicePractice();
+	}
 }
 
 void Player::DrawDebug(void)
 {
 #ifdef _DEBUG
+	if (!SceneManager::GetInstance().GetIsDebugMode()) return;
 	DrawFormatString(
 		0, 64, 0xffffff,
-		"キャラ位置(%.1f, %.1f, %.1f), 角度　 ：(% .1f°, % .1f°, % .1f°)",
-		pos_.x, 
-		pos_.y, 
-		pos_.z, 
+		"角度　 ：(% .1f°, % .1f°, % .1f°)",
 		AsoUtility::Rad2Deg(angles_.x),
 		AsoUtility::Rad2Deg(angles_.y),
 		AsoUtility::Rad2Deg(angles_.z)
