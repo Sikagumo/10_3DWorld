@@ -49,14 +49,14 @@ void Enemy::InitAnim(void)
 	int type = static_cast<int>(ANIM_TYPE::IDLE);
 	anim_ = new AnimationController(modelId_);
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::IDLE),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Idle.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Idle.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::WALK),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::THROW),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::THROW),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
 	// 歩行アニメーション有効
 	ChangeAnim(ANIM_TYPE::WALK);
@@ -77,6 +77,21 @@ void Enemy::Update(void)
 
 	// 索敵
 	SearchField();
+
+	if (isNoticeHearing_)
+	{
+		VECTOR dir = player_->GetPos();
+		dir.y = 0.0f;
+		dir = VNorm(dir);
+		float pDir = atan2(dir.x, dir.z);
+
+		angles_.y = pDir;
+
+		LookPlayer();
+	}
+
+	// 角度から方向に変換する
+	moveDir_ = { sinf(angles_.y), 0.0f, cosf(angles_.y) };
 }
 
 void Enemy::Draw(void)
@@ -122,6 +137,11 @@ void Enemy::DrawViewRange(void)
 	DrawLine3D(pos_, forwardPos, 0x0000ff);
 	DrawLine3D(pos_, leftPos, 0x0000ff);
 	DrawLine3D(pos_, rightPos, 0x0000ff);
+
+	VECTOR vec = VSub(player_->GetPos(), pos_);
+	float distance = ((vec.x * vec.x) + (vec.z * vec.z));
+	VECTOR _forward = VScale(forward, (VIEW_ANGLE * VIEW_ANGLE));
+	DrawLine3D(pos_, _forward, 0xffffff);
 }
 
 void Enemy::DrawSearchRange(void)
@@ -195,16 +215,40 @@ void Enemy::Search(void)
 
 	const float viewRad = AsoUtility::Deg2Rad(VIEW_ANGLE);
 
+	// プレイヤーとの距離
+	VECTOR vec = VSub(player_->GetPos(), pos_);
+	float distance = ((vec.x * vec.x) + (vec.z * vec.z));
+
 	// 視野左右内に入っている
-	isNoticeVision_ = (angle <= viewRad);
+	isNoticeVision_ = (distance <= VIEW_RANGE * VIEW_RANGE && (angle <= viewRad));
 }
 
 void Enemy::SearchField(void)
 {
+	// 360°範囲索敵処理
 	VECTOR vec = VSub(player_->GetPos(), pos_);
 
 	float diff = ((vec.x * vec.x) + (vec.z * vec.z));
 
 	// 視野左右内に入っている
 	isNoticeHearing_ = (diff <= (VIEW_RANGE * VIEW_RANGE));
+}
+
+void Enemy::LookPlayer(void)
+{
+	/*　プレイヤー向き追尾処理　*/
+	VECTOR pPos = player_->GetPos();
+
+	VECTOR diff = VSub(pPos, pos_);
+
+	VECTOR dir = VNorm({ diff.x, 0.0f, diff.z });
+
+	float rotY = atan2f(dir.x, dir.z);
+
+	angles_.y = rotY;
+}
+
+void Enemy::Move(void)
+{
+
 }

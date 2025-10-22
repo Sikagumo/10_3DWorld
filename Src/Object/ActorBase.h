@@ -46,6 +46,7 @@ protected:
 	VECTOR angles_;
 	VECTOR scales_;
 	VECTOR localAngles_;
+	VECTOR velocity_;
 
 	// ˆÚ“®•ûŒü
 	VECTOR moveDir_;

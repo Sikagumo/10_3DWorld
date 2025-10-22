@@ -75,7 +75,13 @@ private:
 	// ŒŸ’mƒtƒ‰ƒO
 	bool isNoticeHearing_;
 
+	/// @brief ³–Ê”ÍˆÍ
 	void Search(void);
 
+	/// @brief 360‹õ“G”ÍˆÍ
 	void SearchField(void);
+
+	void LookPlayer(void);
+
+	void Move(void)override;
 };

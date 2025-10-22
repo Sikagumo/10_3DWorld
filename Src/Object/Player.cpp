@@ -50,20 +50,21 @@ void Player::InitAnim(void)
 	int type = static_cast<int>(ANIM_TYPE::IDLE);
 	anim_ = new AnimationController(modelId_);
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::IDLE),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Idle.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Idle.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::WALK),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::WALK),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::THROW),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::THROW),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
-	anim_->Add(static_cast<int>(ANIM_TYPE::RUN),
-		SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Run.mv1").c_str());
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::RUN),
+		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Run.mv1").c_str());
 
 	// 歩行アニメーション有効
 	ChangeAnim(ANIM_TYPE::IDLE);
+	animType_ = static_cast<int>(ANIM_TYPE::IDLE);
 }
 void Player::InitPost(void)
 {
@@ -146,10 +147,10 @@ void Player::Move(void)
 
 	if (GetJoypadNum() == 0)
 	{
-		if (input.KeyIsNew(KEY_INPUT_W)) { dir = AsoUtility::DIR_F; }
-		if (input.KeyIsNew(KEY_INPUT_S)) { dir = AsoUtility::DIR_B; }
-		if (input.KeyIsNew(KEY_INPUT_A)) { dir = AsoUtility::DIR_L; }
-		if (input.KeyIsNew(KEY_INPUT_D)) { dir = AsoUtility::DIR_R; }
+		if (input.KeyIsNew(KEY_INPUT_W)) { dir = VAdd(dir, AsoUtility::DIR_F); }
+		if (input.KeyIsNew(KEY_INPUT_S)) { dir = VAdd(dir, AsoUtility::DIR_B); }
+		if (input.KeyIsNew(KEY_INPUT_A)) { dir = VAdd(dir, AsoUtility::DIR_L); }
+		if (input.KeyIsNew(KEY_INPUT_D)) { dir = VAdd(dir, AsoUtility::DIR_R); }
 	}
 	else
 	{
@@ -158,14 +159,29 @@ void Player::Move(void)
 	
 	if (!AsoUtility::EqualsVZero(dir))
 	{
+		// 移動ベクトルを正規化
+		float len = sqrtf((dir.x * dir.x) + (dir.z * dir.z));
+		float length = sqrtf(len);
+
+		if (length > 1.0f)
+		{
+			float scale = (1.0f / length);
+
+			// 移動ベクトルの長さを正規化
+			dir.x *= scale;
+			dir.z *= scale;
+		}
+
 		// カメラの方向で進行
 		VECTOR cameraAngle = SceneManager::GetInstance().GetCamera().GetAngles();
 		cameraAngle.x = 0.0f;
 		MATRIX cameraMat = MatrixUtility::GetMatrixRotateXYZ(cameraAngle);
 
+		// 移動方向を取得
 		moveDir_ = VTransform(dir, cameraMat);
 
-		/* // プレイヤーの向きで進行
+#pragma region プレイヤーの向きで進行する処理
+		/*  
 		MATRIX mat = MGetIdent();
 		//mat = MMult(mat, MGetRotX(angles_.x));
 		mat = MMult(mat, MGetRotY(angles_.y));
@@ -177,6 +193,7 @@ void Player::Move(void)
 		// 移動方向から角度に変換する
 		//angles_.y = atan2f(moveDir_.x, moveDir_.z);
 		*/
+#pragma endregion
 
 		// 方向×スピードで移動量を作って、座標に足して移動
 		pos_ = VAdd(pos_, VScale(moveDir_, MOVE_SPEED));
@@ -184,7 +201,7 @@ void Player::Move(void)
 
 		if (input.KeyIsNew(KEY_INPUT_LSHIFT))
 		{
-			//ChangeAnim(ANIM_TYPE::RUN);
+			ChangeAnim(ANIM_TYPE::RUN);
 		}
 		else
 		{
