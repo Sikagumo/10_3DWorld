@@ -1,20 +1,22 @@
 #pragma once
 #include "SceneBase.h"
+#include <vector>
 class Grid;
 class Stage;
+class ActorBase;
 class Player;
 class Enemy;
 
-class TitleScene : public SceneBase
+class GameScene : public SceneBase
 {
 
 public:
 
 	// コンストラクタ
-	TitleScene(void);
+	GameScene(void);
 
 	// デストラクタ
-	~TitleScene(void) override;
+	~GameScene(void) override;
 
 	void Init(void) override;
 	void Update(void) override;
@@ -31,4 +33,8 @@ private:
 	Player* player_;
 
 	Enemy* enemy_;
+
+	void CollisionGround(ActorBase& actor);
+	void CollisionWall(ActorBase& actor);
+	void CollisionEnemys(void);
 };

@@ -12,10 +12,12 @@ public:
 	static constexpr VECTOR LOCAL_ANGLES = { 0.0f, 180.0f * (DX_PI_F / 180.0f), 0.0f };
 
 	// 視野の広さ
-	static constexpr float VIEW_RANGE = 600.0f;
+	static constexpr float VIEW_RANGE = 400.0f;
 
 	// 視野角
 	static constexpr float VIEW_ANGLE = 30.0f;
+
+	static constexpr float MOVE_SPEED = 1.0f;
 
 
 	// アニメーション種別
@@ -37,7 +39,7 @@ public:
 
 	void Draw(void)override;
 
-	void DrawDebug(void);
+	void DrawDebug(void)override;
 
 	void Release(void)override;
 

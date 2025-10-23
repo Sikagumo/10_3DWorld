@@ -25,6 +25,8 @@ void ActorBase::Init(void)
 
 	// 初期化後の個別処理
 	InitPost();
+
+	radius_ = RADIUS;
 }
 
 void ActorBase::Update(void)
@@ -41,6 +43,9 @@ void ActorBase::Update(void)
 	// 回転行列をモデルに反映
 	MV1SetRotationMatrix(modelId_, mat);
 
+	// 重力加速
+	Gravity();
+
 	// プレイヤーの移動処理
 	Move();
 
@@ -53,11 +58,25 @@ void ActorBase::Update(void)
 void ActorBase::Draw(void)
 {
 	MV1DrawModel(modelId_);
+#ifdef _DEBUG
+	DrawCapsule3D(pos_, GetPosHead(), radius_,
+		16, 0xff0000, 0xffffff, false);
+#endif
 }
 
 void ActorBase::Release(void)
 {
 	delete anim_;
+}
+
+void ActorBase::CollisionStage(const VECTOR& pos)
+{
+	if (!isGround_ && jumpPow_ <= 0.0f)
+	{
+		pos_ = pos;
+		jumpPow_ = 0.0f;
+		isGround_ = true;
+	}
 }
 
 
@@ -82,6 +101,23 @@ void ActorBase::InitTransformPost(void)
 void ActorBase::Move(void)
 {
 }
+
+void ActorBase::Gravity(void)
+{
+	if (isGround_) { return; }
+
+	// 重力加速
+	jumpPow_ -= GRAVITY_ACC;
+
+	if (jumpPow_ < -GRAVITY_MAX)
+	{
+		jumpPow_ = -GRAVITY_MAX;
+	}
+
+	// 位置に反映
+	pos_.y += jumpPow_;
+}
+
 void ActorBase::DelayRotate(void)
 {
 	// 移動方向から角度に変換する

@@ -9,21 +9,33 @@ public:
 	// アニメーションの再生速度
 	static constexpr float SPEED_ANIM = 20.0f;
 
+	// ジャンプアニメーションの再生速度
+	static constexpr float SPEED_ANIM_JUMP = 40.0f;
+
+	
 	static constexpr VECTOR LOCAL_ANGLES = { 0.0f, 180.0f * (DX_PI_F / 180.0f), 0.0f };
 
+	static constexpr VECTOR START_POS = { 0.0f, 0.0f, -200.0f };
 	// 回転速度
 	static constexpr float ROT_SPEED = (5.0f * (DX_PI_F / 180.0f));
 
 	// 移動速度
 	static constexpr float MOVE_SPEED = 5.0f;
 
+	// ダッシュ倍率
+	static constexpr float DASH_MULT = 1.5f;
+
+
 	// アニメーション種別
 	enum class ANIM_TYPE
 	{
-		IDLE,
-		WALK,
-		THROW,
-		RUN,
+		IDLE, // 待機
+		WALK, // 歩行
+		THROW, // 投げる
+		RUN, // ダッシュ
+		JUMP,
+
+
 		MAX,
 	};
 
@@ -37,7 +49,7 @@ public:
 
 	void Draw(void)override;
 
-	void DrawDebug(void);
+	void DrawDebug(void)override;
 
 	void Release(void)override;
 	
@@ -58,6 +70,10 @@ private:
 
 	VECTOR autoAngles_;
 
+	bool isDash_;
+
+	float waitTime_;
+
 
 	void InitLoad(void)override;
 
@@ -71,7 +87,9 @@ private:
 
 	void SyncDice(void);
 
-	void Move(void);
+	void Move(void)override;
+
+	void Jump(void);
 
 	// プレイヤーの遅延回転処理
 	void DelayRotate(void);

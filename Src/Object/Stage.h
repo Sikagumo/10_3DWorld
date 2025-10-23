@@ -19,6 +19,8 @@ public:
 
 	void Release(void);
 
+	int GetModelId(void)const { return modelId_; };
+
 
 private:
 

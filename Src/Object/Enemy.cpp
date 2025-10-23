@@ -7,6 +7,7 @@
 #include "./Player.h"
 #include "../Manager/ResourceManager.h"
 #include "../Manager/SceneManager.h"
+#include "../Manager/InputManager.h"
 
 Enemy::Enemy(Player* player)
 {
@@ -40,23 +41,25 @@ void Enemy::InitTransform(void)
 
 	pos_ = {200.0f , 0.0f, 150.0f};
 
+	speed_ = 3.0f;
+
 	// モデルの位置設定
 	MV1SetPosition(modelId_, pos_);
 }
 
 void Enemy::InitAnim(void)
 {
-	int type = static_cast<int>(ANIM_TYPE::IDLE);
+	int type = -1;
 	anim_ = new AnimationController(modelId_);
 
-	anim_->AddExternal(static_cast<int>(ANIM_TYPE::IDLE),
-		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Idle.mv1").c_str());
+	type = static_cast<int>(ANIM_TYPE::IDLE);
+	anim_->AddExternal(type, SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Idle.mv1").c_str());
 
-	anim_->AddExternal(static_cast<int>(ANIM_TYPE::WALK),
-		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
+	type = static_cast<int>(ANIM_TYPE::WALK);
+	anim_->AddExternal(type, SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
-	anim_->AddExternal(static_cast<int>(ANIM_TYPE::THROW),
-		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
+	type = static_cast<int>(ANIM_TYPE::THROW);
+	anim_->AddExternal(type, SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
 	// 歩行アニメーション有効
 	ChangeAnim(ANIM_TYPE::WALK);
@@ -88,6 +91,14 @@ void Enemy::Update(void)
 		angles_.y = pDir;
 
 		LookPlayer();
+
+		// 移動アニメーション
+		ChangeAnim(ANIM_TYPE::WALK);
+	}
+	else
+	{
+		// 待機アニメーション
+		ChangeAnim(ANIM_TYPE::IDLE);
 	}
 
 	// 角度から方向に変換する
@@ -107,6 +118,10 @@ void Enemy::Draw(void)
 }
 void Enemy::DrawViewRange(void)
 {
+	const float offsetY = 25.0f;
+	VECTOR viewPos = pos_;
+	viewPos.y += offsetY;
+
 	unsigned int color = ((isNoticeVision_) ? 0xff0000 : 0x00aaff);
 
 	MATRIX mat = MatrixUtility::GetMatrixRotateXYZ(angles_);
@@ -123,29 +138,38 @@ void Enemy::DrawViewRange(void)
 	VECTOR right = VTransform(AsoUtility::DIR_F, rightMat);
 
 	// 正面の位置
-	VECTOR forwardPos = VAdd(pos_, VScale(forward, VIEW_RANGE));
+	VECTOR forwardPos = VAdd(viewPos, VScale(forward, VIEW_RANGE));
 
 	// 左の位置
-	VECTOR leftPos = VAdd(pos_, VScale(left, VIEW_RANGE));
+	VECTOR leftPos = VAdd(viewPos, VScale(left, VIEW_RANGE));
 
 	// 右の位置
-	VECTOR rightPos = VAdd(pos_, VScale(right, VIEW_RANGE));
+	VECTOR rightPos = VAdd(viewPos, VScale(right, VIEW_RANGE));
 
-	DrawTriangle3D(pos_, leftPos, forwardPos, color, true);
-	DrawTriangle3D(pos_, forwardPos, rightPos, color, true);
+	DrawTriangle3D(viewPos, leftPos, forwardPos, color, true);
+	DrawTriangle3D(viewPos, forwardPos, rightPos, color, true);
 
-	DrawLine3D(pos_, forwardPos, 0x0000ff);
-	DrawLine3D(pos_, leftPos, 0x0000ff);
-	DrawLine3D(pos_, rightPos, 0x0000ff);
+	DrawLine3D(viewPos, forwardPos, 0x0000ff);
+	DrawLine3D(viewPos, leftPos, 0x0000ff);
+	DrawLine3D(viewPos, rightPos, 0x0000ff);
 
-	VECTOR vec = VSub(player_->GetPos(), pos_);
+	VECTOR pPos = player_->GetPos();
+	pPos.y += offsetY;
+
+	VECTOR vec = VSub(pPos, viewPos);
 	float distance = ((vec.x * vec.x) + (vec.z * vec.z));
 	VECTOR _forward = VScale(forward, (VIEW_ANGLE * VIEW_ANGLE));
-	DrawLine3D(pos_, _forward, 0xffffff);
+
+	DrawLine3D(viewPos, _forward, 0xffffff);
 }
 
 void Enemy::DrawSearchRange(void)
 {
+	// 描画位置調整
+	const float offsetY = 25.0f;
+	VECTOR viewPos = pos_;
+	viewPos.y += offsetY;
+
 	unsigned int color = ((isNoticeHearing_) ? 0xffff00 : 0x00aaaa);
 	MATRIX mat = MatrixUtility::GetMatrixRotateXYZ(angles_);
 
@@ -168,14 +192,24 @@ void Enemy::DrawSearchRange(void)
 		rightMat = MMult(mat, MGetRotY(AsoUtility::Deg2Rad(angle * (i + 1))));
 		right = VTransform(AsoUtility::DIR_F, rightMat);
 
-		leftPos = VAdd(pos_, VScale(left, VIEW_RANGE));
-		rightPos = VAdd(pos_, VScale(right, VIEW_RANGE));
+		leftPos = VAdd(viewPos, VScale(left, VIEW_RANGE));
+		rightPos = VAdd(viewPos, VScale(right, VIEW_RANGE));
 
-		DrawTriangle3D(pos_, leftPos, rightPos, color, true);
+		DrawTriangle3D(viewPos, leftPos, rightPos, color, true);
 
-		DrawLine3D(pos_, leftPos, 0xff0000);
-		DrawLine3D(pos_, rightPos, 0xff0000);
+		DrawLine3D(viewPos, leftPos, 0xff0000);
+		DrawLine3D(viewPos, rightPos, 0xff0000);
 	}
+}
+
+void Enemy::DrawDebug(void)
+{
+#ifdef _DEBUG
+	if (SceneManager::GetInstance().GetIsDebugMode())
+	{
+		DrawFormatString(0, 148, 0xffffff, "Enemy anim(%d)", animType_);
+	}
+#endif
 }
 
 void Enemy::Release(void)
@@ -243,12 +277,31 @@ void Enemy::LookPlayer(void)
 
 	VECTOR dir = VNorm({ diff.x, 0.0f, diff.z });
 
+	// Y軸の向きに反映
 	float rotY = atan2f(dir.x, dir.z);
-
 	angles_.y = rotY;
+
+	// ベクトルの長さを正規化
+	float len = sqrtf((dir.x * dir.x) + (dir.z * dir.z));
+	float length = sqrtf(len);
+	if (length > 1.0f)
+	{
+		float scale = (1.0f / length);
+		dir.x *= scale;
+		dir.z *= scale;
+	}
+
+
+	MATRIX mat = MatrixUtility::GetMatrixRotateXYZ(angles_);
+
+	// 移動方向を取得
+	moveDir_ = VTransform(dir, mat);
 }
 
 void Enemy::Move(void)
 {
+	// 移動処理
+	if (!isNoticeHearing_) { return; }
 
+	pos_ = VAdd(pos_, VScale(moveDir_, speed_));
 }

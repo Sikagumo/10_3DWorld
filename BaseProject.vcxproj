@@ -37,12 +37,13 @@
     <ClCompile Include="Src\Object\Player.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
-    <ClCompile Include="Src\Scene\TitleScene.cpp" />
+    <ClCompile Include="Src\Scene\GameScene.cpp" />
     <ClCompile Include="Src\Utility\AsoUtility.cpp" />
     <ClCompile Include="Src\Utility\MatrixUtility.cpp" />
     <ClCompile Include="Src\Utility\Vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\resource.h" />
     <ClInclude Include="Src\Application.h" />
     <ClInclude Include="Src\Common\Fader.h" />
     <ClInclude Include="Src\Common\FrameRate.h" />
@@ -61,10 +62,16 @@
     <ClInclude Include="Src\Object\Player.h" />
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
-    <ClInclude Include="Src\Scene\TitleScene.h" />
+    <ClInclude Include="Src\Scene\GameScene.h" />
     <ClInclude Include="Src\Utility\AsoUtility.h" />
     <ClInclude Include="Src\Utility\MatrixUtility.h" />
     <ClInclude Include="Src\Utility\Vector2.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Src\BaseProject.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Data\Image\Icon.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

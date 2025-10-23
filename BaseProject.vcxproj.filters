@@ -63,7 +63,7 @@
     <ClCompile Include="Src\Scene\SceneBase.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Scene\TitleScene.cpp">
+    <ClCompile Include="Src\Scene\GameScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Src\Utility\AsoUtility.cpp">
@@ -128,7 +128,7 @@
     <ClInclude Include="Src\Manager\SceneManager.h">
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Scene\TitleScene.h">
+    <ClInclude Include="Src\Scene\GameScene.h">
       <Filter>ヘッダー ファイル\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\SceneBase.h">
@@ -179,5 +179,18 @@
     <ClInclude Include="Src\Common\FrameRate.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\resource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Src\BaseProject.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Data\Image\Icon.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>

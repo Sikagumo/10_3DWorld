@@ -2,7 +2,7 @@
 #include <chrono>
 #include <DxLib.h>
 #include "../Common/Fader.h"
-#include "../Scene/TitleScene.h"
+#include "../Scene/GameScene.h"
 #include "./Camera.h"
 #include "./MiniCamera.h"
 #include "./InputManager.h"
@@ -229,7 +229,7 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	switch (sceneId_)
 	{
 	case SCENE_ID::TITLE:
-		scene_ = new TitleScene();
+		scene_ = new GameScene();
 		break;
 
 	case SCENE_ID::GAME:

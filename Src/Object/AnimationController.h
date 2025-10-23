@@ -17,9 +17,9 @@ public:
 	struct Animation
 	{
 		ANIM_TYPE type = ANIM_TYPE::NONE;
-		int model		= -1;
+		int modelId		= -1; // アニメーションモデル
 		int attachNo	= -1;
-		int animIndex	= 0;
+		int animIndex	= 0;    // モデル内アニメーション番号
 		float speed		= 0.0f; // 再生速度
 		float totalTime = 0.0f; // 最大再生時間
 		float step		= 0.0f; // 現在再生時間

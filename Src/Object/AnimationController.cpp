@@ -28,7 +28,7 @@ void AnimationController::AddInternal(int _type, float _speed, int _animIndex)
 	/* 内部のアニメーションの追加 */
 	Animation anim;
 
-	anim.model = -1;
+	anim.modelId = -1;
 
 	anim.animIndex = _animIndex;
 
@@ -38,6 +38,8 @@ void AnimationController::AddInternal(int _type, float _speed, int _animIndex)
 	// アニメーション状態割り当て
 	anim.type = ANIM_TYPE::INTERNAL;
 
+	anim.step = 0.0f;
+
 	// アニメーション追加処理
 	Add(_type, anim);
 }
@@ -46,15 +48,16 @@ void AnimationController::AddExternal(int _type, float _speed, const std::string
 	/* 外部のアニメーションの追加 */
 	Animation anim;
 
-	anim.model = MV1LoadModel(_path.c_str());
-
-	anim.animIndex = -1;
+	anim.modelId = MV1LoadModel(_path.c_str());
 
 	// アニメーション速度割り当て
 	anim.speed = _speed;
 
 	// アニメーション状態割り当て
 	anim.type = ANIM_TYPE::EXTERNAL;
+
+	anim.step = 0.0f;
+
 
 	// アニメーション追加処理
 	Add(_type, anim);
@@ -99,7 +102,7 @@ void AnimationController::Play(int _type, bool _isLoop, float _blendTime)
 	playAnim.step = 0.0f;
 
 	// モデルにアニメーションを付ける
-	if (playAnim.model == -1)
+	if (playAnim.type == ANIM_TYPE::INTERNAL)
 	{
 		// モデルと同じファイルからアニメーションをアタッチする
 		playAnim.attachNo = MV1AttachAnim(modelId_, playAnim.animIndex);
@@ -109,15 +112,15 @@ void AnimationController::Play(int _type, bool _isLoop, float _blendTime)
 		// 別のモデルファイルからアニメーションをアタッチする
 		// DxModelViewerを確認すること(大体0か1)
 		int animIdx = 0;
-		playAnim.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim.model);
+		playAnim.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim.modelId);
 	}
 
 	// アニメーション総時間の取得
 	playAnim.totalTime = MV1GetAttachAnimTotalTime(modelId_, playAnim.attachNo);
 
 
-	// 前回のアニメーションがある時、ブレンド率を100%にする
-	float blendRate = ((prePlayType_ != -1) ? 1.0f : 0.0f);
+	// 前回のアニメーションがある時、ブレンド率を1.0f(100%)にする
+	float blendRate = ((prePlayType_ == -1) ? 1.0f : 0.0f);
 
 	// ブレンドアニメーションの割合を割り当て
 	MV1SetAttachAnimBlendRate(modelId_, playAnim.attachNo, blendRate);
@@ -141,6 +144,7 @@ void AnimationController::Update(void)
 		// アニメーション進行処理
 		curAnim.step += (deltaTime * curAnim.speed);
 		
+		int temp = 0;
 		if (curAnim.step >= curAnim.totalTime && isLoop_)
 		{
 			// 再生がループ状態で終了時、初期位置に戻す
@@ -197,11 +201,11 @@ void AnimationController::Release(void)
 		if (anim.type == ANIM_TYPE::EXTERNAL)
 		{
 			// アニメーション解放
-			MV1DeleteModel(anim.model);
+			MV1DeleteModel(anim.modelId);
 		}
 		
 		// 取付られているアニメーションの場合
-		if (anim.attachNo != -1)
+		if (anim.type == ANIM_TYPE::INTERNAL)
 		{
 			// アニメーションをリセット
 			MV1DetachAnim(modelId_, anim.attachNo);

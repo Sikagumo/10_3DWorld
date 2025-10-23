@@ -18,16 +18,22 @@ Player::Player(void)
 	pos_ = {};
 	angles_ = {};
 	autoAngles_ = {};
+	isDash_ = false;
 }
 
 void Player::InitLoad(void)
 {
-	modelId_ = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER);
+	ResourceManager& res = ResourceManager::GetInstance();
+
+	modelId_ = res.LoadModelDuplicate(ResourceManager::SRC::MODEL_PLAYER);
+
+	dice_.modelId = res.LoadHandleId(ResourceManager::SRC::MODEL_DICE);
 }
 
 void Player::InitTransform(void)
 {
 	angles_ = {};
+	localAngles_ = LOCAL_ANGLES;
 
 	scales_ = { 1.0f, 1.0f, 1.0f };
 
@@ -40,7 +46,10 @@ void Player::InitTransform(void)
 	// 回転行列をモデルに反映
 	MV1SetRotationMatrix(modelId_, mat);
 
-	pos_ = {};
+	pos_ = START_POS;
+
+	speed_ = MOVE_SPEED;
+	isDash_ = false;
 
 	// モデルの位置設定
 	MV1SetPosition(modelId_, pos_);
@@ -62,9 +71,11 @@ void Player::InitAnim(void)
 	anim_->AddExternal(static_cast<int>(ANIM_TYPE::RUN),
 		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Run.mv1").c_str());
 
+	anim_->AddExternal(static_cast<int>(ANIM_TYPE::JUMP),
+		               SPEED_ANIM_JUMP, (ResourceManager::PATH_MODEL + "Player/Jump.mv1").c_str());
+
 	// 歩行アニメーション有効
 	ChangeAnim(ANIM_TYPE::IDLE);
-	animType_ = static_cast<int>(ANIM_TYPE::IDLE);
 }
 void Player::InitPost(void)
 {
@@ -75,8 +86,7 @@ void Player::InitPost(void)
 }
 void Player::InitDice(void)
 {
-	dice_.modelId = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_DICE);
-	float scale = 0.1f;
+	const float scale = 0.1f;
 	dice_.scales = { scale, scale, scale };
 	//dice.localPos = { 200.0f, 100.0f, 0.0f };
 	dice_.localPos = { 0.0f, 100.0f, 200.0f };
@@ -92,21 +102,13 @@ void Player::InitDice(void)
 
 void Player::Update(void)
 {
-	// プレイヤーの遅延回転処理
-	DelayRotate();
+	ActorBase::Update();
 
+	// ジャンプ
+	Jump();
 
-	MATRIX mat = MatrixUtility::Multiplication(LOCAL_ANGLES, angles_);
-
-	// 回転行列をモデルに反映
-	MV1SetRotationMatrix(modelId_, mat);
-
-	Move();
 	// モデルの位置設定
 	MV1SetPosition(modelId_, pos_);
-
-	anim_->Update();
-
 
 	autoAngles_.y += 0.01f;
 	SyncDice();
@@ -195,21 +197,29 @@ void Player::Move(void)
 		*/
 #pragma endregion
 
+		float speed = ((isDash_) ? (speed_ * DASH_MULT) : speed_);
+
 		// 方向×スピードで移動量を作って、座標に足して移動
-		pos_ = VAdd(pos_, VScale(moveDir_, MOVE_SPEED));
+		pos_ = VAdd(pos_, VScale(moveDir_, speed));
 
 
-		if (input.KeyIsNew(KEY_INPUT_LSHIFT))
+		if (isGround_)
 		{
-			ChangeAnim(ANIM_TYPE::RUN);
-		}
-		else
-		{
-			// 歩行アニメーション有効
-			ChangeAnim(ANIM_TYPE::WALK);
+			if (input.KeyIsNew(KEY_INPUT_LSHIFT) ||
+				input.PadIsBtnNew(1, InputManager::PAD_BTN::DOWN))
+			{
+				isDash_ = true;
+				ChangeAnim(ANIM_TYPE::RUN);
+			}
+			else
+			{
+				isDash_ = false;
+				// 歩行アニメーション有効
+				ChangeAnim(ANIM_TYPE::WALK);
+			}
 		}
 	}
-	else
+	else if (isGround_)
 	{
 		// 待機アニメーション有効
 		ChangeAnim(ANIM_TYPE::IDLE);
@@ -221,10 +231,36 @@ void Player::Move(void)
 	//if (input.KeyIsNew(KEY_INPUT_RIGHT)) { angles_.y += (rot * (DX_PI_F / 180.0f)); }
 }
 
+void Player::Jump(void)
+{
+	InputManager& input = InputManager::GetInstance();
+	const float jumpPow = 10.0f;
+
+	if (!isGround_) { return; }
+
+	if (input.KeyIsTrgDown(KEY_INPUT_SPACE) ||
+		input.PadIsBtnTrgDown(1, InputManager::PAD_BTN::RIGHT))
+	{
+		// ジャンプアニメーション化
+		ChangeAnim(ANIM_TYPE::JUMP, false);
+
+		// ジャンプ処理
+		jumpPow_ = jumpPow;
+		isGround_ = false;
+	}
+
+	// 着地時、待機アニメーションに遷移
+	if (anim_->GetPlayType() == static_cast<int>(ANIM_TYPE::JUMP)&&
+		isGround_)
+	{
+		ChangeAnim(ANIM_TYPE::WALK);
+	}
+}
+
 
 void Player::Draw(void)
 {
-	MV1DrawModel(modelId_);
+	ActorBase::Draw();
 
 	MV1DrawModel(dice_.modelId);
 
@@ -238,6 +274,9 @@ void Player::DrawDebug(void)
 {
 #ifdef _DEBUG
 	if (!SceneManager::GetInstance().GetIsDebugMode()) return;
+
+	DrawFormatString(385, 80, 0xffffff, "player anim(%d)", animType_);
+
 	DrawFormatString(
 		0, 64, 0xffffff,
 		"角度　 ：(% .1f°, % .1f°, % .1f°)",

@@ -6,9 +6,18 @@ class AnimationController;
 class ActorBase
 {
 public:
-
+	
 	// アニメーションの再生速度
 	static constexpr float SPEED_ANIM = 20.0f;
+
+	static constexpr float GRAVITY_MAX = 9.8f;
+
+	static constexpr float GRAVITY_ACC = 0.2f;
+
+	static constexpr float RADIUS = 35.0f;
+
+	static constexpr float HEAD_POS = 100.0f;
+
 
 	// コンストラクタ
 	ActorBase(void);
@@ -22,6 +31,8 @@ public:
 
 	virtual void Draw(void);
 
+	virtual void DrawDebug(void) {};
+
 	virtual void Release(void);
 
 
@@ -30,6 +41,22 @@ public:
 
 	const VECTOR& GetAngles(void) const { return angles_; }
 
+	bool GetIsGround(void) { return isGround_; }
+
+	const VECTOR GetDir(void) { return moveDir_; };
+
+	float GetSpeed(void) { return speed_; };
+
+
+	void CollisionStage(const VECTOR& pos);
+
+	void SetIsGround(bool flag) { isGround_ = flag; };
+
+	VECTOR GetPosHead(void) { return { pos_.x, pos_.y + HEAD_POS, pos_.z }; };
+
+	float GetRadius(void) { return radius_; };
+
+	void SetPos(const VECTOR& pos) { pos_ = pos; };
 
 protected:
 
@@ -42,14 +69,23 @@ protected:
 	// モデル情報
 	int modelId_;
 
+	bool isGround_;
+
+	float jumpPow_;
+
 	VECTOR pos_;
 	VECTOR angles_;
 	VECTOR scales_;
 	VECTOR localAngles_;
-	VECTOR velocity_;
 
 	// 移動方向
 	VECTOR moveDir_;
+
+	// 移動速度
+	float speed_;
+
+	// 半径
+	float radius_;
 
 
 	// リソースロード
@@ -69,6 +105,8 @@ protected:
 
 	// 移動処理
 	virtual void Move(void);
+
+	void Gravity(void);
 
 	// 遅延回転処理
 	void DelayRotate(void);
