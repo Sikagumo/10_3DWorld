@@ -244,6 +244,23 @@ bool AnimationController::IsEnd(void) const
 	*/
 }
 
+bool AnimationController::IsEndPoint(float _pointRate, float _offset)
+{
+	auto& anim = animations_.at(playType_);
+
+	float point = _pointRate;
+
+	// 再生位置の上限制限
+	point = ((point < 0.0f) ? 0.0f : point);
+	point = ((point > 1.0f) ? 1.0f : point);
+
+	// 再生位置の割合
+	float rate = (anim.step / anim.totalTime);
+
+	// 再生位置が指定の割合になったときtrue
+	return (rate >= point && rate < (point + _offset));
+}
+
 void AnimationController::SetAnimStep(float step)
 {
 	auto& anim = animations_.at(playType_);
@@ -258,14 +275,26 @@ void AnimationController::SetAnimStep(float step)
 		// 再生位置割り当て
 		anim.step = step;
 	}
+}
 
-#ifdef _DEBUG
-	else
+void AnimationController::SetAnimStepRate(float _rate)
+{
+	auto& anim = animations_.at(playType_);
+
+	float step = _rate;
+
+	// 再生位置の上限制限
+	step = ((step < 0.0f) ? 0.0f : step);
+	step = ((step > 1.0f) ? 1.0f : step);
+
+	// 割合の値
+	float rate = (1.0f / anim.totalTime);
+
+	if (playType_ != -1)
 	{
-		OutputDebugString("\nアニメーションが割り当てられていないため、再生位置の割り当てが出来ませんでした；；\n");
-		assert(false); // 例外スロー
+		// 再生位置割り当て
+		anim.step = (rate * step);
 	}
-#endif
 }
 
 float AnimationController::GetPlayTime(void)
@@ -307,6 +336,8 @@ float AnimationController::GetPlayTimeTotal(void)
 
 	return time;
 }
+
+
 
 void AnimationController::Add(int _type, Animation& _animation)
 {

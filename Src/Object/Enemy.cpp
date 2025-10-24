@@ -8,6 +8,7 @@
 #include "../Manager/ResourceManager.h"
 #include "../Manager/SceneManager.h"
 #include "../Manager/InputManager.h"
+#include "./Shot.h"
 
 Enemy::Enemy(Player* player)
 {
@@ -28,7 +29,10 @@ void Enemy::InitTransform(void)
 	angles_ = { 0.0f, AsoUtility::Deg2Rad(45.0f), 0.0f };
 	localAngles_ = LOCAL_ANGLES;
 
-	scales_ = { 1.0f, 1.0f, 1.0f };
+	scales_ = { SCALE, SCALE, SCALE };
+	shotScale_ = SCALE_SHOT;
+
+	hp_ = 3;
 
 	// 角度から方向に変換する
 	moveDir_ = { sinf(angles_.y), 0.0f, cosf(angles_.y) };
@@ -41,10 +45,19 @@ void Enemy::InitTransform(void)
 
 	pos_ = {200.0f , 0.0f, 150.0f};
 
+	radiusShot_ = RADIUS_SHOT;
+
 	speed_ = 3.0f;
+
+	timeAttack_ = ATTACK_TIME;
 
 	// モデルの位置設定
 	MV1SetPosition(modelId_, pos_);
+
+	SetFrame();
+
+	int handle = ResourceManager::GetInstance().LoadHandleId(ResourceManager::SRC::MODEL_SHOT);
+	shot_ = new Shot(handle, 0xff0000, *this);
 }
 
 void Enemy::InitAnim(void)
@@ -59,7 +72,7 @@ void Enemy::InitAnim(void)
 	anim_->AddExternal(type, SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
 	type = static_cast<int>(ANIM_TYPE::THROW);
-	anim_->AddExternal(type, SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
+	anim_->AddExternal(type, SPEED_ANIM_ATK, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
 	// 歩行アニメーション有効
 	ChangeAnim(ANIM_TYPE::WALK);
@@ -73,6 +86,8 @@ void Enemy::InitPost(void)
 
 void Enemy::Update(void)
 {
+	if (hp_ <= 0) { return; }
+
 	ActorBase::Update();
 
 	// 索敵
@@ -81,24 +96,31 @@ void Enemy::Update(void)
 	// 索敵
 	SearchField();
 
-	if (isNoticeHearing_)
+	SetFrame();
+
+	MV1SetPosition(modelId_, pos_);
+
+	if (!isAttack_)
 	{
-		VECTOR dir = player_->GetPos();
-		dir.y = 0.0f;
-		dir = VNorm(dir);
-		float pDir = atan2(dir.x, dir.z);
+		if (isNoticeHearing_)
+		{
+			VECTOR dir = player_->GetPos();
+			dir.y = 0.0f;
+			dir = VNorm(dir);
+			float pDir = atan2(dir.x, dir.z);
 
-		angles_.y = pDir;
+			angles_.y = pDir;
 
-		LookPlayer();
+			LookPlayer();
 
-		// 移動アニメーション
-		ChangeAnim(ANIM_TYPE::WALK);
-	}
-	else
-	{
-		// 待機アニメーション
-		ChangeAnim(ANIM_TYPE::IDLE);
+			// 移動アニメーション
+			ChangeAnim(ANIM_TYPE::WALK);
+		}
+		else
+		{
+			// 待機アニメーション
+			ChangeAnim(ANIM_TYPE::IDLE);
+		}
 	}
 
 	// 角度から方向に変換する
@@ -107,6 +129,13 @@ void Enemy::Update(void)
 
 void Enemy::Draw(void)
 {
+	if (hp_ <= 0) { return; }
+
+	COLOR_F defaultColor = { 1.0f, 1.0f,1.0f, 1.0f };
+	COLOR_F damageColor = { 1.0f, 0.0f,0.0f, 1.0f };
+	COLOR_F color = ((timeInv_ > 0.0f) ? damageColor : defaultColor);
+
+	MV1SetDifColorScale(modelId_, color);
 	ActorBase::Draw();
 
 	if (SceneManager::GetInstance().GetIsDebugMode())
@@ -214,8 +243,7 @@ void Enemy::DrawDebug(void)
 
 void Enemy::Release(void)
 {
-	anim_->Release();
-	delete anim_;
+	ActorBase::Release();
 }
 
 
@@ -301,7 +329,45 @@ void Enemy::LookPlayer(void)
 void Enemy::Move(void)
 {
 	// 移動処理
-	if (!isNoticeHearing_) { return; }
+	if (!isNoticeHearing_ || isAttack_) { return; }
 
 	pos_ = VAdd(pos_, VScale(moveDir_, speed_));
+
+	SetFrame();
+}
+
+void Enemy::Attack(void)
+{
+	return;
+	float delta = SceneManager::GetInstance().GetDeltaTime();
+
+
+	if (isAttack_)
+	{
+		if (!shot_->GetIsShot()) { return; }
+
+		timeAttack_ -= ((isNoticeVision_) ? delta : 0.0f);
+
+		if (timeAttack_ <= 0.0f)
+		{
+			isAttack_ = true;
+			ChangeAnim(ANIM_TYPE::THROW, false);
+		}
+	}
+	else
+	{
+		SetFrame();
+
+		if (anim_->IsEndPoint(0.35f) && shot_->GetIsShot())
+		{
+			shot_->SetShot(moveDir_, 1.5f, 7.5f);
+		}
+
+		if (anim_->IsEnd())
+		{
+			isAttack_ = false;
+			timeAttack_ = ATTACK_TIME;
+			//ChangeAnim(ANIM_TYPE::IDLE);
+		}
+	}
 }

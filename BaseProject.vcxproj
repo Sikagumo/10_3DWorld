@@ -35,6 +35,7 @@
     <ClCompile Include="Src\Object\Enemy.cpp" />
     <ClCompile Include="Src\Object\Grid.cpp" />
     <ClCompile Include="Src\Object\Player.cpp" />
+    <ClCompile Include="Src\Object\Shot.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Scene\GameScene.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="Src\Utility\Vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Shot.h" />
     <ClInclude Include="Src\resource.h" />
     <ClInclude Include="Src\Application.h" />
     <ClInclude Include="Src\Common\Fader.h" />

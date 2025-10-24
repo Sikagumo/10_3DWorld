@@ -15,7 +15,8 @@ public:
 	
 	static constexpr VECTOR LOCAL_ANGLES = { 0.0f, 180.0f * (DX_PI_F / 180.0f), 0.0f };
 
-	static constexpr VECTOR START_POS = { 0.0f, 0.0f, -200.0f };
+	static constexpr VECTOR START_POS = { 0.0f, 0.0f, -250.0f };
+
 	// 回転速度
 	static constexpr float ROT_SPEED = (5.0f * (DX_PI_F / 180.0f));
 
@@ -26,6 +27,16 @@ public:
 	static constexpr float DASH_MULT = 1.5f;
 
 
+	// 胴体のスケール
+	static constexpr float SCALE = 1.0f;
+
+	// 弾のスケール
+	static constexpr float SCALE_SHOT = 0.1f;
+
+	// 弾の半径
+	static constexpr float RADIUS_SHOT = 30.0f;
+
+
 	// アニメーション種別
 	enum class ANIM_TYPE
 	{
@@ -33,8 +44,7 @@ public:
 		WALK, // 歩行
 		THROW, // 投げる
 		RUN, // ダッシュ
-		JUMP,
-
+		JUMP,// ジャンプ
 
 		MAX,
 	};
@@ -54,7 +64,7 @@ public:
 	void Release(void)override;
 	
 
-private:
+protected:
 
 	// サイコロモデル情報
 	struct Dice
@@ -90,6 +100,8 @@ private:
 	void Move(void)override;
 
 	void Jump(void);
+	
+	void Attack(void)override;
 
 	// プレイヤーの遅延回転処理
 	void DelayRotate(void);
@@ -102,4 +114,7 @@ private:
 	/// <param name="type"></param>
 	/// <param name="isLoop">ループするか否か</param>
 	void ChangeAnim(ANIM_TYPE type, bool isLoop = true);
+
+private:
+
 };

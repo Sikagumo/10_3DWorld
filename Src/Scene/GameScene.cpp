@@ -8,6 +8,7 @@
 #include "../Object/ActorBase.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
+#include "../Object/Shot.h"
 #include "../Manager/Camera.h"
 #include "../Utility/AsoUtility.h"
 
@@ -64,6 +65,26 @@ void GameScene::Update(void)
 	CollisionGround(*enemy_);
 	CollisionWall(*enemy_);
 	CollisionEnemys();
+
+	
+	Shot& pShot = player_->GetShot();
+	if (AsoUtility::IsHitSphereCapsule(pShot.GetPos(), pShot.GetRadius(),
+									   enemy_->GetPos(), enemy_->GetPosHead(), enemy_->GetRadius()))
+	{
+		if (pShot.GetState() == Shot::STATE::SHOT)
+		{
+			pShot.SetIsHit();
+
+			enemy_->SetDamage();
+		}
+	}
+
+	Shot& eShot = enemy_->GetShot();
+	if (AsoUtility::IsHitSphereCapsule(eShot.GetPos(), eShot.GetRadius(),
+									   player_->GetPos(), enemy_->GetPosHead(), player_->GetRadius()))
+	{
+		//eShot.SetIsHit();
+	}
 }
 
 void GameScene::Draw(void)

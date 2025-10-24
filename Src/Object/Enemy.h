@@ -19,6 +19,16 @@ public:
 
 	static constexpr float MOVE_SPEED = 1.0f;
 
+	static constexpr float ATTACK_TIME = 1.0f;
+
+	// 胴体のスケール
+	static constexpr float SCALE = 1.0f;
+
+	// 弾のスケール
+	static constexpr float SCALE_SHOT = 0.05f;
+
+	// 弾の半径
+	static constexpr float RADIUS_SHOT = 30.0f;
 
 	// アニメーション種別
 	enum class ANIM_TYPE
@@ -77,6 +87,9 @@ private:
 	// 検知フラグ
 	bool isNoticeHearing_;
 
+	// 攻撃タイマー
+	float timeAttack_;
+
 	/// @brief 正面範囲
 	void Search(void);
 
@@ -86,4 +99,6 @@ private:
 	void LookPlayer(void);
 
 	void Move(void)override;
+
+	void Attack(void)override;
 };

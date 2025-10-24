@@ -2,6 +2,7 @@
 #include <string>
 #include <DxLib.h>
 class AnimationController;
+class Shot;
 
 class ActorBase
 {
@@ -16,7 +17,11 @@ public:
 
 	static constexpr float RADIUS = 35.0f;
 
-	static constexpr float HEAD_POS = 100.0f;
+	static constexpr float HEAD_POS = 150.0f;
+
+	static constexpr float SPEED_ANIM_ATK = 40.0f;
+
+	static constexpr float INV_TIME = 1.0f;
 
 
 	// コンストラクタ
@@ -54,14 +59,31 @@ public:
 
 	VECTOR GetPosHead(void) { return { pos_.x, pos_.y + HEAD_POS, pos_.z }; };
 
+	VECTOR& GetPosHand(void) { return handPos_; }
+
 	float GetRadius(void) { return radius_; };
 
+	float GetShotRadius(void) { return radiusShot_; };
+
+	const VECTOR& GetShotScale(void) { return { shotScale_,shotScale_,shotScale_ }; };
+
+	Shot& GetShot(void) { return *shot_; };
+
+
 	void SetPos(const VECTOR& pos) { pos_ = pos; };
+
+	void SetDamage(void);
+
+	int GetHp(void) { return hp_; };
+
 
 protected:
 
 	// アニメーション制御
 	AnimationController* anim_;
+
+	
+	Shot* shot_;
 
 	// アニメーション種別
 	int animType_;
@@ -70,13 +92,25 @@ protected:
 	int modelId_;
 
 	bool isGround_;
-
+	bool isAttack_;
 	float jumpPow_;
+
+	float timeInv_;
 
 	VECTOR pos_;
 	VECTOR angles_;
 	VECTOR scales_;
 	VECTOR localAngles_;
+
+	// 手のモデルフレーム
+	VECTOR handPos_;
+	int handNum_;
+	MATRIX handLocalMat_;
+
+	int hp_;
+
+	// 弾のスケール
+	float shotScale_;
 
 	// 移動方向
 	VECTOR moveDir_;
@@ -86,6 +120,7 @@ protected:
 
 	// 半径
 	float radius_;
+	float radiusShot_;
 
 
 	// リソースロード
@@ -104,10 +139,14 @@ protected:
 	virtual void InitPost(void) = 0;
 
 	// 移動処理
-	virtual void Move(void);
+	virtual void Move(void) {};
+
+	virtual void Attack(void) {};
 
 	void Gravity(void);
 
 	// 遅延回転処理
 	void DelayRotate(void);
+
+	void SetFrame(void);
 };

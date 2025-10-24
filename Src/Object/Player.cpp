@@ -9,7 +9,7 @@
 #include "../Manager/Resource.h"
 #include "../Manager/InputManager.h"
 #include "../Manager/SceneManager.h"
-#include "../Manager/Camera.h"
+#include "./Shot.h"
 
 
 Player::Player(void)
@@ -32,10 +32,13 @@ void Player::InitLoad(void)
 
 void Player::InitTransform(void)
 {
+	hp_ = 10;
+
 	angles_ = {};
 	localAngles_ = LOCAL_ANGLES;
 
-	scales_ = { 1.0f, 1.0f, 1.0f };
+	scales_ = { SCALE,SCALE,SCALE };
+	shotScale_ = SCALE_SHOT;
 
 	// 角度から方向に変換する
 	moveDir_ = { sinf(angles_.y), 0.0f, cosf(angles_.y) };
@@ -48,11 +51,17 @@ void Player::InitTransform(void)
 
 	pos_ = START_POS;
 
+	radiusShot_ = RADIUS_SHOT;
+
 	speed_ = MOVE_SPEED;
 	isDash_ = false;
 
 	// モデルの位置設定
 	MV1SetPosition(modelId_, pos_);
+
+	SetFrame();
+	int handle = ResourceManager::GetInstance().LoadModelDuplicate(ResourceManager::SRC::MODEL_DICE);
+	shot_ = new Shot(handle, 0xff0000, *this);
 }
 void Player::InitAnim(void)
 {
@@ -66,7 +75,7 @@ void Player::InitAnim(void)
 		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Walk.mv1").c_str());
 
 	anim_->AddExternal(static_cast<int>(ANIM_TYPE::THROW),
-		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
+		               SPEED_ANIM_ATK, (ResourceManager::PATH_MODEL + "Player/Throw.mv1").c_str());
 
 	anim_->AddExternal(static_cast<int>(ANIM_TYPE::RUN),
 		               SPEED_ANIM, (ResourceManager::PATH_MODEL + "Player/Run.mv1").c_str());
@@ -107,6 +116,8 @@ void Player::Update(void)
 	// ジャンプ
 	Jump();
 
+	SetFrame();
+
 	// モデルの位置設定
 	MV1SetPosition(modelId_, pos_);
 
@@ -146,6 +157,9 @@ void Player::Move(void)
 	InputManager& input = InputManager::GetInstance();
 
 	VECTOR dir = {};
+
+	// 攻撃中、処理終了
+	if (isAttack_) { return; }
 
 	if (GetJoypadNum() == 0)
 	{
@@ -203,7 +217,7 @@ void Player::Move(void)
 		pos_ = VAdd(pos_, VScale(moveDir_, speed));
 
 
-		if (isGround_)
+		if (isGround_ && !isAttack_)
 		{
 			if (input.KeyIsNew(KEY_INPUT_LSHIFT) ||
 				input.PadIsBtnNew(1, InputManager::PAD_BTN::DOWN))
@@ -218,8 +232,10 @@ void Player::Move(void)
 				ChangeAnim(ANIM_TYPE::WALK);
 			}
 		}
+
+		SetFrame();
 	}
-	else if (isGround_)
+	else if (isGround_ && !isAttack_)
 	{
 		// 待機アニメーション有効
 		ChangeAnim(ANIM_TYPE::IDLE);
@@ -236,7 +252,7 @@ void Player::Jump(void)
 	InputManager& input = InputManager::GetInstance();
 	const float jumpPow = 10.0f;
 
-	if (!isGround_) { return; }
+	if (!isGround_ || isAttack_) { return; }
 
 	if (input.KeyIsTrgDown(KEY_INPUT_SPACE) ||
 		input.PadIsBtnTrgDown(1, InputManager::PAD_BTN::RIGHT))
@@ -257,9 +273,43 @@ void Player::Jump(void)
 	}
 }
 
+void Player::Attack(void)
+{
+	InputManager& input = InputManager::GetInstance();
+
+	if (!isAttack_)
+	{
+		if (!shot_->GetIsShot()) { return; }
+
+		if (input.KeyIsTrgDown(KEY_INPUT_RETURN) ||
+			input.PadIsBtnTrgDown(1, InputManager::PAD_BTN::RIGHT))
+		{
+			isAttack_ = true;
+			ChangeAnim(ANIM_TYPE::THROW, false);
+		}
+	}
+	else
+	{
+		SetFrame();
+
+		if (anim_->IsEndPoint(0.325f))
+		{
+			shot_->SetShot(moveDir_, 10.0f, -1.5f);
+		}
+
+		if (anim_->IsEnd())
+		{
+			isAttack_ = false;
+		}
+	}
+}
+
 
 void Player::Draw(void)
 {
+	COLOR_F color = { 0.0f, 1.0f, 0.0f, 1.0f};
+
+	MV1SetDifColorScale(modelId_, color);
 	ActorBase::Draw();
 
 	MV1DrawModel(dice_.modelId);
@@ -272,11 +322,8 @@ void Player::Draw(void)
 
 void Player::DrawDebug(void)
 {
+	if (!SceneManager::GetInstance().GetIsDebugMode()) { return; }
 #ifdef _DEBUG
-	if (!SceneManager::GetInstance().GetIsDebugMode()) return;
-
-	DrawFormatString(385, 80, 0xffffff, "player anim(%d)", animType_);
-
 	DrawFormatString(
 		0, 64, 0xffffff,
 		"角度　 ：(% .1f°, % .1f°, % .1f°)",
@@ -292,15 +339,12 @@ void Player::DrawDebug(void)
 		AsoUtility::Rad2Deg(dice_.angles.y),
 		AsoUtility::Rad2Deg(dice_.angles.z)
 	);
-
-
 #endif
 }
 
 void Player::Release(void)
 {
-	anim_->Release();
-	delete anim_;
+	ActorBase::Release();
 }
 
 

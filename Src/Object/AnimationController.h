@@ -25,6 +25,9 @@ public:
 		float step		= 0.0f; // 現在再生時間
 	};
 
+	// デフォルト終了間隔
+	static constexpr float END_POINT_OFFSET = 0.2f;
+
 
 	/// @brief コンストラクタ
 	/// @param _modelId アニメーション対象
@@ -65,6 +68,10 @@ public:
 	/// @brief アニメーションが終了しているか否か
 	bool IsEnd(void) const;
 
+	/// @brief 一定の位置に到達したかの判定
+	/// @param _pointRate 再生位置の割合(0.0f～1.0f)
+	bool IsEndPoint(float _pointRate, float _offset = END_POINT_OFFSET);
+
 	/// @brief 再生中のアニメーション番号取得
 	int GetPlayType(void) { return playType_; };
 
@@ -75,12 +82,15 @@ public:
 	/// @param _step 再生する位置
 	void SetAnimStep(float _step = 0.0f);
 
+	/// @brief 再生位置変更
+	/// @param rate 再生位置の割合(0.0f～1.0f)
+	void SetAnimStepRate(float rate);
+
 	/// @brief 再生中のアニメーションの現在時間を取得
 	float GetPlayTime(void);
 
 	/// @brief 再生中のアニメーションの総再生時間を取得
 	float GetPlayTimeTotal(void);
-
 
 private:
 
